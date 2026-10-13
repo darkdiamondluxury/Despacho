@@ -1671,7 +1671,7 @@ function renderGestao(){
   var items=[['types','Tipos de serviço','Nomes, durações e tipos novos'],['src','Origens dos serviços','Canais diretos, apps e parceiros']];
   if(cm)items.push(['money','Valores, IVA e prazos',st.payExample?'Valores dos drivers de exemplo, por mudar':'IVA de '+st.vat+' %, valores dos drivers']);
   items.push(['co','Dados da empresa',co.name||'Para a service sheet e as faturas']);
-  if(isAdmin())items.push(['access','Acessos','Quem vê valores e finanças']);
+  if(isAdmin())items.push(['access','Acessos','Quem vê valores e finanças'],['ai','Leitura automática',aiCfg().key?'Leitura com IA ligada neste telemóvel':'Só leitura básica. Liga a leitura com IA']);
   items.push(['audit','Registo de alterações','Quem fez o quê e quando'],['look','Aspeto',{auto:'Automático',dark:'Escuro',light:'Claro'}[st.theme]||'Automático'],['demo','Dados de exemplo','Este protótipo guarda tudo só neste browser']);
   h+=sec('Definições','<div class="group">'+items.map(function(i){return '<button type="button" class="nrow" data-act="set" data-k="'+i[0]+'"><span>'+esc(i[1])+'<span class="s">'+esc(i[2])+'</span></span>'+I_CHEV+'</button>';}).join('')+'</div>');
   $('#main').innerHTML=h;
@@ -2066,6 +2066,26 @@ function openSettings(k){
       '<p class="hint">Depois do tempo de espera, o driver pode marcar que o cliente não apareceu.</p></div>';
     acts.tyEdit=function(el){openTypeForm(el.dataset.n,reopen);};
     acts.tyNew=function(){openTypeForm(null,reopen);};
+  }else if(k==='ai'){
+    title='Leitura automática';
+    var cfg=aiCfg(),inClaude=aiState()==='on';
+    body=(inClaude?'<div class="notice ok"><b>Dentro do Claude, a leitura com IA já funciona</b><span>Esta configuração serve para a app instalada no telemóvel.</span></div>':'')+
+      '<p style="margin:0 0 10px">Com a leitura com IA, a app lê prints, fotografias e letra à mão e preenche o serviço. Sem ela, faz uma leitura básica do texto de prints, no próprio telemóvel.</p>'+
+      '<div class="notice '+(cfg.key?'ok':'info')+'"><b>'+(cfg.key?'Ligada neste telemóvel':'Desligada neste telemóvel')+'</b><span>'+(cfg.key?'Modelo: '+(cfg.model==='claude-haiku-5-5'?'rápido e mais barato':'mais preciso')+'.':'Precisa de uma chave da API da Anthropic.')+'</span></div>'+
+      '<div style="display:grid;gap:14px"><div class="f"><label for="ai_key">Chave da API da Anthropic</label><input id="ai_key" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="sk-ant-…" value="'+esc(cfg.key)+'"></div>'+
+      '<div class="f"><label for="ai_model">Modelo</label><select id="ai_model"><option value="claude-sonnet-5-5"'+(cfg.model!=='claude-haiku-5-5'?' selected':'')+'>Mais preciso, cerca de 1 cêntimo por leitura (recomendado)</option><option value="claude-haiku-5-5"'+(cfg.model==='claude-haiku-5-5'?' selected':'')+'>Rápido e mais barato, menos bom com letra à mão</option></select></div>'+
+      '<p class="err" id="e_ai" hidden></p><div id="aiMsg"></div></div>'+
+      '<details class="more" style="margin-top:18px"><summary><span>Como obter a chave</span></summary><div class="more-b"><p class="hint" style="margin:0 0 8px">1. Cria uma conta em <a href="https://console.anthropic.com" target="_blank" rel="noopener">console.anthropic.com</a> e carrega saldo, por exemplo 10 €.</p><p class="hint" style="margin:0 0 8px">2. Em API keys, cria uma chave e copia-a.</p><p class="hint" style="margin:0 0 8px">3. Define um limite de gastos mensal na consola, por segurança.</p><p class="hint" style="margin:0">4. Cola a chave aqui e toca em Testar e guardar.</p></div></details>'+
+      '<p class="fine">A chave fica guardada só neste telemóvel e não vai para os drivers. Quem usar este telemóvel pode fazer leituras com ela. Na versão final, a leitura passa a ser feita no servidor e ninguém precisa de chave.</p>';
+    foot='<button type="button" class="btn" data-act="aiSave">Testar e guardar</button>'+(cfg.key?'<button type="button" class="tbtn danger" data-act="aiOff">Desligar e apagar a chave</button>':'');
+    acts.aiSave=function(){
+      var key=$('#ai_key').value.trim(),model=$('#ai_model').value,e=$('#e_ai'),msg=$('#aiMsg');e.hidden=true;
+      if(!/^sk-ant-/.test(key)){e.textContent='A chave começa por sk-ant-. Copia-a outra vez da consola.';e.hidden=false;return;}
+      msg.innerHTML='<p class="hint">A testar a ligação…</p>';
+      apiPing(key,model).then(function(){setAiCfg({key:key,model:model});audit('Leitura com IA ligada num telemóvel');save();toast('Leitura com IA ligada');reopen();},
+        function(err){msg.innerHTML='';var c=err&&err.code;e.textContent=c==='bad_key'?'A chave não é válida.':c==='no_credit'?'A conta não tem saldo. Carrega-a na consola.':c==='offline'?'Sem ligação à internet.':'Não foi possível ligar: '+(err&&err.detail||'erro desconhecido')+'.';e.hidden=false;});
+    };
+    acts.aiOff=function(){setAiCfg({key:'',model:aiCfg().model});toast('Chave apagada deste telemóvel');reopen();};
   }else if(k==='src'){
     title='Origens dos serviços';
     var chs=st.channels||(st.channels=[]),cnt={};S.services.forEach(function(x){if(x.origin==='direct'&&x.channel)cnt[x.channel]=(cnt[x.channel]||0)+1;});
@@ -2513,7 +2533,8 @@ function openEditor(existing,prefill,opts){
   var valOpen=ai.has('price')||!blank(s.price)||!blank(s.cost)||!blank(s.pay);
   var top='';
   if(opts.ref)top=opts.refText?'<details class="more" open style="margin:0 0 22px"><summary><span>Mensagem do pedido</span></summary><div class="more-b"><pre class="sel" style="margin:0">'+esc(opts.refText)+'</pre></div></details>':'<details class="more" open style="margin:0 0 22px"><summary><span>Imagem do pedido</span></summary><div class="more-b"><img class="ssimg" src="'+opts.img+'" alt="Imagem do pedido"></div></details>';
-  else if(!existing&&opts.src&&opts.src!=='manual')top='<div class="banner"><div><b>Lido automaticamente</b>Confirma os campos marcados antes de guardar. O que não estava '+(opts.src==='texto'?'na mensagem':'na imagem')+' fica em branco.</div>'+(opts.img?'<img class="thumb" src="'+opts.img+'" alt="Imagem original">':'')+'</div>';
+  else if(!existing&&opts.src&&opts.src!=='manual')top='<div class="banner"><div><b>'+(opts.basic?'Lido no telemóvel':'Lido automaticamente')+'</b>'+(opts.basic?'Leitura básica: confirma os campos marcados e completa o resto.':'Confirma os campos marcados antes de guardar. O que não estava '+(opts.src==='texto'?'na mensagem':'na imagem')+' fica em branco.')+'</div>'+(opts.img?'<img class="thumb" src="'+opts.img+'" alt="Imagem original">':'')+'</div>'+
+    (opts.seenText&&opts.src!=='texto'?'<details class="more" style="margin:-8px 0 22px"><summary><span>Texto lido da imagem</span></summary><div class="more-b"><pre class="sel" style="margin:0">'+esc(opts.seenText)+'</pre></div></details>':'');
   else if(!existing&&opts.img)top='<div class="banner"><div>Preenche os dados a partir da imagem.</div><img class="thumb" src="'+opts.img+'" alt="Imagem original"></div>';
   if(existing&&existing.status==='recusado')top='<div class="notice bad"><b>Recusado</b>'+(existing.declineReason?'<span>“'+esc(existing.declineReason)+'”</span>':'')+'</div>';
   var rateSel=function(k,cur){return '<select id="f_'+k+'">'+VAT_RATES.map(function(r){return '<option value="'+r+'"'+(r===Number(cur)?' selected':'')+'>'+r+' %</option>';}).join('')+'</select>';};
@@ -3213,6 +3234,131 @@ function openShareSheet(s,back,mode){
   });
 }
 
+/* ---------- reading outside Claude ----------
+   1) Claude, when the app runs inside Claude.
+   2) The Anthropic API, with a key the admin saves on this device (reads prints, photos and handwriting).
+   3) Basic reading on the phone: OCR of the image, then rules that pick out dates, times, flights, phones and places. */
+var AI_LS='despacho-ai';
+function aiCfg(){try{var c=JSON.parse(localStorage.getItem(AI_LS)||'{}');return {key:c.key||'',model:c.model||'claude-sonnet-5-5'};}catch(e){return {key:'',model:'claude-sonnet-5-5'};}}
+function setAiCfg(c){try{localStorage.setItem(AI_LS,JSON.stringify(c));return true;}catch(e){return false;}}
+function apiErr(code,detail){var e=new Error(detail||code);e.code=code;e.detail=detail||'';return e;}
+function apiCall(body,signal,key){
+  var cfg=aiCfg();key=key||cfg.key;
+  if(!key)return Promise.reject(apiErr('no_key'));
+  return fetch('https://api.anthropic.com/v1/messages',{method:'POST',signal:signal,headers:{'content-type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify(body)})
+    .then(function(r){return r.json().catch(function(){return {};}).then(function(j){
+      if(!r.ok){var m=(j&&j.error&&j.error.message)||('HTTP '+r.status);throw apiErr(r.status===401||r.status===403?'bad_key':r.status===429?'rate_limited':/credit|balance|billing/i.test(m)?'no_credit':r.status===529||r.status>=500?'overloaded':'api_error',m);}
+      return j;});},function(e){if(e&&e.name==='AbortError')throw apiErr('cancelled');throw apiErr('offline');});
+}
+function apiExtract(prompt,dataURL,signal){
+  var content=[];
+  if(dataURL){var m=/^data:([^;]+);base64,(.*)$/.exec(dataURL);if(m)content.push({type:'image',source:{type:'base64',media_type:m[1],data:m[2]}});}
+  content.push({type:'text',text:prompt+'\nResponde só com o objeto JSON, sem texto antes nem depois.'});
+  return apiCall({model:aiCfg().model,max_tokens:1500,messages:[{role:'user',content:content}]},signal).then(function(j){
+    var t=(j.content||[]).filter(function(c){return c.type==='text';}).map(function(c){return c.text;}).join('');
+    var a=t.indexOf('{'),b=t.lastIndexOf('}');if(a<0||b<a)throw apiErr('invalid_json');
+    try{return JSON.parse(t.slice(a,b+1));}catch(e){throw apiErr('invalid_json');}
+  });
+}
+function apiPing(key,model){return apiCall({model:model,max_tokens:5,messages:[{role:'user',content:'Responde apenas: ok'}]},null,key);}
+
+var scriptP={};
+function loadScript(src){return scriptP[src]||(scriptP[src]=new Promise(function(res,rej){var el=document.createElement('script');el.src=src;el.onload=res;el.onerror=function(){delete scriptP[src];rej(apiErr('ocr_failed'));};document.head.appendChild(el);}));}
+var ocrWorkerP=null,ocrProgress=null;
+function ocrText(file){
+  var base=new URL('ocr/',location.href).href;
+  return loadScript(base+'tesseract.min.js').then(function(){
+    if(!ocrWorkerP)ocrWorkerP=window.Tesseract.createWorker(['por','eng'],1,{workerPath:base+'worker.min.js',corePath:base,langPath:base+'lang',gzip:true,logger:function(m){if(ocrProgress)ocrProgress(m);}}).catch(function(e){ocrWorkerP=null;throw e;});
+    return ocrWorkerP;
+  }).then(function(w){return w.recognize(file);}).then(function(r){return (r&&r.data&&r.data.text)||'';},function(e){throw (e&&e.code)?e:apiErr('ocr_failed',String(e&&e.message||e));});
+}
+
+var M3={jan:1,fev:2,feb:2,mar:3,abr:4,apr:4,mai:5,may:5,jun:6,jul:7,ago:8,aug:8,set:9,sep:9,out:10,oct:10,nov:11,dez:12,dec:12};
+function ymd(y,m,d){
+  if(!(m>=1&&m<=12&&d>=1&&d<=31))return '';
+  var t=today(),ty=+t.slice(0,4);
+  if(y){if(y<100)y+=2000;return y+'-'+pad(m)+'-'+pad(d);}
+  var c=ty+'-'+pad(m)+'-'+pad(d);if(c<addDays(t,-1))c=(ty+1)+'-'+pad(m)+'-'+pad(d);return c;
+}
+function findDate(raw){
+  var n=norm(raw),m;
+  if((m=/\b(20\d{2})-(\d{1,2})-(\d{1,2})\b/.exec(n)))return ymd(+m[1],+m[2],+m[3]);
+  if((m=/\b(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{2,4})\b/.exec(n))){var a=+m[1],b=+m[2];return b>12&&a<=12?ymd(+m[3],a,b):ymd(+m[3],b,a);}
+  var mn='(jan(?:eiro|uary)?|fev(?:ereiro)?|feb(?:ruary)?|mar(?:co|ch)?|abr(?:il)?|apr(?:il)?|mai(?:o)?|may|jun(?:ho|e)?|jul(?:ho|y)?|ago(?:sto)?|aug(?:ust)?|set(?:embro)?|sep(?:t(?:ember)?)?|out(?:ubro)?|oct(?:ober)?|nov(?:embro|ember)?|dez(?:embro)?|dec(?:ember)?)\\.?';
+  if((m=new RegExp('\\b(\\d{1,2})(?:st|nd|rd|th|o)?\\s+(?:de\\s+)?'+mn+'(?:,?\\s+(?:de\\s+)?(\\d{4}))?\\b').exec(n)))return ymd(m[3]?+m[3]:0,M3[m[2].slice(0,3)],+m[1]);
+  if((m=/\b(jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|june?|july?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\.?\s+(\d{1,2})(?:st|nd|rd|th)?(?:,?\s+(\d{4}))?\b/.exec(n)))return ymd(m[3]?+m[3]:0,M3[m[1].slice(0,3)],+m[2]);
+  if((m=/\b(\d{1,2})\/(\d{1,2})\b/.exec(n)))return ymd(0,+m[2],+m[1]);
+  if(/\b(depois de amanha|day after tomorrow)\b/.test(n))return addDays(today(),2);
+  if(/\b(amanha|tomorrow)\b/.test(n))return addDays(today(),1);
+  if(/\b(hoje|today|tonight|esta noite)\b/.test(n))return today();
+  return '';
+}
+function timesIn(line){
+  var out=[],re=/\b([01]?\d|2[0-3])\s?[:h]\s?([0-5]\d)\s?(a\.?m\.?|p\.?m\.?)?(?![\d])/gi,m;
+  while((m=re.exec(line))){var h=+m[1],ap=(m[3]||'').toLowerCase().replace(/\./g,'');if(ap==='pm'&&h<12)h+=12;if(ap==='am'&&h===12)h=0;out.push(pad(h)+':'+m[2]);}
+  var re2=/\b(1[0-2]|0?[1-9])\s?(am|pm)\b/gi;while((m=re2.exec(line))){var h2=+m[1];if(/pm/i.test(m[2])&&h2<12)h2+=12;if(/am/i.test(m[2])&&h2===12)h2=0;out.push(pad(h2)+':00');}
+  var re3=/\b([01]?\d|2[0-3])h(?![\d])/gi;while((m=re3.exec(line))){out.push(pad(+m[1])+':00');}
+  return out;
+}
+var AIRLINES='TP|FR|U2|EZY|EJU|BA|AF|KL|LH|IB|VY|EK|QR|TK|UA|AA|DL|LX|SN|AZ|S4|HV|W6|W9|LO|OS|SK|AY|EI|UX|AT|ET|MS|LY|AC|BT|DY|D8|4U|LG|A3|JU|RO|I2|V7|LS|BY|TOM|EXS|AR|LA|G3|AD|JJ|CM|AV|SV|EY|WY|KE|NH|JL|CA|MU|CZ|SQ|TG|QF|NZ|ZB|OK|FB|PC|XQ|XC';
+function basicParse(raw){
+  var text=String(raw||'').replace(/\r/g,'').replace(/[|¦]/g,' '),lines=text.split('\n').map(function(l){return l.replace(/\s+/g,' ').trim();}).filter(Boolean),n=norm(text),o={},m;
+  function after(re,i){var l=lines[i],mm=re.exec(l);if(!mm)return null;var v=(mm[mm.length-1]||'').replace(/^[:\-–\s]+/,'').trim(),j=i;if(!v&&lines[i+1]){v=lines[i+1];j=i+1;}var nx=lines[j+1];if(v&&nx&&/^(\d{1,4}\b(?![:h]\d)|\d{4}-\d{3}|(lisboa|lisbon|porto|cascais|sintra|estoril|oeiras|almada|portugal)\b)/i.test(nx))v+=' '+nx;return v;}
+  function isPlace(v){if(!v||v.length<3)return false;if(/^[\d\s:h.,\-\/]+$/i.test(v))return false;if(timesIn(v).length&&v.length<=12)return false;return true;}
+  // contacts
+  if((m=/[\w.+-]+@[\w-]+\.[\w.-]+/.exec(text)))o.clientEmail=m[0];
+  if((m=/(?:\+|\b00)\s?\d{1,3}[\s.\-]?\(?\d{1,4}\)?(?:[\s.\-]?\d{2,4}){2,4}\b/.exec(text))||(m=/\b9[1236]\d\s?\d{3}\s?\d{3}\b/.exec(text)))o.clientPhone=m[0].replace(/\s+/g,' ').trim();
+  // flight
+  for(var i=0;i<lines.length&&!o.flight;i++){if(/\b(flight|voo|v[oô]o|vuelo|vol|flug)\b/i.test(lines[i])){var fm=/\b([A-Z0-9]{2,3})\s?-?\s?(\d{1,4}[A-Z]?)\b/.exec(lines[i].replace(/^.*?\b(flight|voo|v[oô]o|vuelo|vol|flug)\b\s*(n[ºo°r]\.?|number|no\.?)?\s*[:#]?/i,''))||(lines[i+1]&&/^([A-Z0-9]{2,3})\s?-?\s?(\d{1,4}[A-Z]?)\b/.exec(lines[i+1]));if(fm&&/[A-Z]/.test(fm[1]))o.flight=fm[1]+' '+fm[2];}}
+  if(!o.flight&&(m=new RegExp('\\b('+AIRLINES+')\\s?(\\d{2,4})\\b').exec(text)))o.flight=m[1]+' '+m[2];
+  // date and time
+  var dl=lines.filter(function(l){return /\b(date|data|dia|day|pick[\s-]?up|recolha|quando|when)\b/i.test(l)&&findDate(l);})[0];
+  o.date=findDate(dl||text)||'';
+  var tl=lines.filter(function(l){return /\b(pick[\s-]?up|recolha|hora|time|horario|hor[aá]rio|at)\b/i.test(norm(l))&&!/\b(landing|aterragem|arrival time|chegada do voo|eta|std|sta)\b/i.test(norm(l))&&timesIn(l).length;})[0];
+  var tt=timesIn(tl||'');if(!tt.length)tt=timesIn(text);if(tt.length)o.time=tt[0];
+  // people and luggage
+  if((m=/\b(\d{1,2})\s*(?:x\s*)?(pax|passengers?|passageiros?|pessoas|persons?|people|adults?|adultos|guests?|hospedes)\b/.exec(n))||(m=/\b(pax|passengers?|passageiros?|pessoas|persons|people|adults?|adultos|guests?|n\.?o? de passageiros)\s*[:\-]?\s*(\d{1,2})\b/.exec(n))){var px=+(/\d/.test(m[1])?m[1]:m[2]);var ch=/\b(\d{1,2})\s*(children|child|kids?|criancas?|bebes?|infants?)\b/.exec(n)||/\b(children|kids|criancas)\s*[:\-]?\s*(\d{1,2})\b/.exec(n);if(ch)px+=+(/\d/.test(ch[1])?ch[1]:ch[2]);if(px>0&&px<60)o.pax=px;}
+  if((m=/\b(\d{1,2})\s*(?:x\s*)?(hand luggage|carry[\s-]?on|cabin bags?|malas? de cabine|bagagem de mao)\b/.exec(n))||(m=/\b(hand luggage|carry[\s-]?on|cabin bags?|malas? de cabine|bagagem de mao)\s*[:\-]?\s*(\d{1,2})\b/.exec(n)))o.cabin=+(/\d/.test(m[1])?m[1]:m[2]);
+  var nb=n.replace(/\b(\d{1,2})\s*(?:x\s*)?(hand luggage|carry[\s-]?on|cabin bags?|malas? de cabine|bagagem de mao)\b/g,'');
+  if((m=/\b(\d{1,2})\s*(?:x\s*)?(bags?|luggage|suitcases?|malas?|pieces?|baggage|bagagens?|volumes?)\b/.exec(nb))||(m=/\b(bags?|luggage|suitcases?|malas?|baggage|bagagens?)\s*[:\-]?\s*(\d{1,2})\b/.exec(nb)))o.checked=+(/\d/.test(m[1])?m[1]:m[2]);
+  if(/\b(child seat|baby seat|booster|car seat|cadeira (de )?(crianca|bebe)|cadeirinha|babyseat)\b/.test(n))o.booster=true;
+  // labelled fields
+  var PU=/^(?:pick[\s-]?up(?:\s+(?:location|address|point|place))?|from|origin|origem|recolha|local de recolha|morada de recolha|start|de)\b\s*[:\-–]?\s*(.*)$/i;
+  var DO=/^(?:drop[\s-]?off(?:\s+(?:location|address|point|place))?|to|destination|destino|morada de destino|local de destino|end|para)\b\s*[:\-–]?\s*(.*)$/i;
+  var NM=/^(?:lead\s+)?(?:passenger|passageiro|guest|h[oó]spede|client(?:e)?|customer|contact|contacto|traveller|traveler|name|nome)(?:\s+(?:name|nome|principal))?\b\s*[:\-–]?\s*(.*)$/i;
+  var RF=/(?:booking|reservation|reserva|ref(?:erence|er[eê]ncia)?|order|pedido|confirmation|confirma[cç][aã]o|job|trip|ride|transfer)\s*(?:no\.?|n[ºo°]\.?|number|id|code|c[oó]digo|#)?\s*[:#\-]?\s*([A-Z0-9][A-Z0-9\-]{3,})/i;
+  var NT=/^(?:notes?|notas|observa[cç][oõ]es|obs|comments?|coment[aá]rios?|instructions|instru[cç][oõ]es|remarks|special requests?|pedidos especiais)\b\s*[:\-–]?\s*(.*)$/i;
+  lines.forEach(function(l,i){
+    var v;
+    if(!o.pickup&&PU.test(l)&&(v=after(PU,i))&&isPlace(v)&&!/^(\d|date|data|time|hora)/i.test(v))o.pickup=v;
+    else if(!o.dropoff&&DO.test(l)&&(v=after(DO,i))&&isPlace(v)&&!/^(\d|date|data|time|hora)/i.test(v))o.dropoff=v;
+    else if(!o.clientName&&NM.test(l)&&(v=after(NM,i))&&!/\d/.test(v)&&v.length<=60&&!/^(passengers?|pax)$/i.test(v))o.clientName=v;
+    else if(!o.notes&&NT.test(l)&&(v=after(NT,i))&&v.length>2)o.notes=v;
+    if(!o.bookingRef&&(m=RF.exec(l))&&/\d/.test(m[1])&&m[1].replace(/\D/g,'')!==String(o.clientPhone||'').replace(/\D/g,''))o.bookingRef=m[1];
+  });
+  if(o.pickup&&!o.dropoff&&(m=/^(.{3,}?)\s+(?:to|para|→|->|até)\s+(.{3,})$/i.exec(o.pickup))){o.pickup=m[1];o.dropoff=m[2];}
+  if(!o.clientName&&(m=/\b(?:Mr|Mrs|Ms|Miss|Sr|Sra|Dr|Dra)\.?\s+[A-ZÀ-Ý][\w'’\-]+(?:\s+[A-ZÀ-Ý][\w'’\-]+){0,3}/.exec(text)))o.clientName=m[0];
+  var flat=lines.join(' ');
+  var stop='(?=\\.\\s+[A-ZÀ-Ý0-9]|\\.\\s*$|[;\\n]|\\s+(?:voo|flight|às|as|at|em|on|com|somos|we|e somos|para o voo)\\b|$)';
+  if(!o.pickup&&(m=new RegExp('\\b(?:recolha|pick[\\s-]?up(?: address| location)?|origem|from)\\s*:\\s*([^\\n;]+?)'+stop,'i').exec(flat)))o.pickup=m[1].trim();
+  if(!o.dropoff&&(m=new RegExp('\\b(?:destino|drop[\\s-]?off(?: address| location)?|destination|to)\\s*:\\s*([^\\n;]+?)'+stop,'i').exec(flat)))o.dropoff=m[1].trim();
+  if(!o.pickup&&!o.dropoff&&(m=new RegExp('\\b(?:do|da|dos|das|de|from)\\s+((?:hotel|aeroporto|airport|the|rua|av|avenida|praça|largo|estação|cais|terminal|[A-ZÀ-Ý])[^,;\\n]{2,80}?)\\s+(?:para|to|até)\\s+(?:o|a|os|as|the)?\\s*(.{3,80}?)'+stop.replace('(?=','(?=,|'),'i').exec(flat))){o.pickup=m[1].trim();o.dropoff=m[2].trim();var lp=/.*\b(?:do|da|dos|das|de|from)\s+((?:[Hh]otel|[Aa]eroporto|[Aa]irport|[Rr]ua|[Aa]v\.?|[Aa]venida|[A-ZÀ-Ý]).+)$/.exec(o.pickup);if(lp)o.pickup=lp[1].trim();if(!/^(hotel|aeroporto|airport|rua|av|avenida|praça|largo|estação|cais|terminal|[A-ZÀ-Ý])/.test(o.pickup))o.pickup='';}
+  if(!o.clientName&&(m=/\b(?:nome|name|passageiro|passenger|cliente|client)\s*:\s*([A-ZÀ-Ý][^\d,\n;.]{2,50})/i.exec(flat)))o.clientName=m[1].trim();
+  var bareAp=function(v){return /^(o |the )?(aeroporto|airport)$/i.test(String(v||'').trim());};
+  var ap=lines.filter(function(l){return isAirport(l);})[0];
+  var arrival=/\b(arrival|arrivals|chegada|chegadas|meet ?(and|&) ?greet|landing|aterragem)\b/.test(n),departure=/\b(departure|departures|partida|partidas)\b/.test(n);
+  if(ap&&!o.pickup&&!o.dropoff){if(departure&&!arrival)o.dropoff=ap;else o.pickup=ap;}
+  else if(ap&&!o.pickup&&o.dropoff&&!isAirport(o.dropoff))o.pickup=ap;
+  else if(ap&&o.pickup&&!o.dropoff&&!isAirport(o.pickup))o.dropoff=ap;
+  if(bareAp(o.pickup))o.pickup='Aeroporto de Lisboa, chegadas';if(bareAp(o.dropoff))o.dropoff='Aeroporto de Lisboa, partidas';
+  if((m=/(?:€|eur)\s?(\d{1,4}(?:[.,]\d{1,2})?)|(\d{1,4}(?:[.,]\d{1,2})?)\s?(?:€|eur\b|euros?\b)/i.exec(text)))o.price=parseFloat((m[1]||m[2]).replace(',','.'));
+  var tn=typeNames(),pick=function(re){return tn.filter(function(x){return re.test(norm(x));})[0];};
+  if(o.pickup&&isAirport(o.pickup))o.eventType=pick(/chegada|arrival/);else if(o.dropoff&&isAirport(o.dropoff))o.eventType=pick(/partida|departure/);
+  if(/\b(van vip|v-class|classe v|vip van)\b/.test(n))o.vehicleType='Van VIP';else if(/\b(van|minivan|minibus|vito|8 seats|7 seats|8 lugares|7 lugares)\b/.test(n))o.vehicleType='Van';else if(/\b(e-class|classe e|executive|business class|business sedan)\b/.test(n))o.vehicleType='Carro Executive';
+  var pm=live(S.partners).filter(function(p){var a=norm(p.name);return a.length>=3&&n.indexOf(a)>-1;})[0];if(pm)o.source=pm.name;
+  return o;
+}
+
 /* ---------- create: chooser, reading ---------- */
 var sampleFn,imagesOK=false,aiOff=false,extractCtl=null;
 var ICON={
@@ -3222,15 +3368,17 @@ var ICON={
   pen:'<svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M4 20l1-4L16 5l3 3L8 19z"/><path d="M14 7l3 3"/></svg>'
 };
 function aiState(){return aiOff?'off':sampleFn===undefined?'loading':sampleFn===null?'off':'on';}
+function readerKind(){if(aiState()==='on')return 'claude';if(aiCfg().key)return 'api';return PWA?'basic':'none';}
 function openChooser(){
-  var st=aiState(),img=st==='on'&&imagesOK;
+  var st=aiState(),rk=readerKind(),full=(rk==='claude'&&imagesOK)||rk==='api',basic=rk==='basic';
   function opt(act,t,sub,ic,dis){return '<button type="button" class="opt" data-act="'+act+'"'+(dis?' disabled':'')+'>'+ICON[ic]+'<span><b>'+t+'</b><small>'+sub+'</small></span>'+I_CHEV+'</button>';}
-  var on=st==='on';
-  var note=st==='loading'?'A preparar a leitura automática.':!on?'A leitura automática de prints só funciona, por agora, quando abres a app dentro do Claude. Aqui, a imagem ou a mensagem ficam à vista enquanto preenches.':img?'O que for lido aparece no formulário para confirmares antes de guardar. No computador também podes colar um print aqui.':'Nesta vista só é possível ler texto colado. As imagens ficam à vista enquanto preenches.';
+  var note=st==='loading'&&!PWA?'A preparar a leitura automática.':full?'Lemos tudo e preenchemos o formulário. Confirmas antes de guardar.'+(rk==='api'?' Cada leitura custa cerca de um cêntimo na conta da API.':''):
+    basic?'Leitura básica, feita no telemóvel: lê o texto de prints e preenche o que reconhece. Para ler fotografias e letra à mão, '+(isAdmin()?'liga a leitura com IA em Gestão, Definições, Leitura automática.':'pede ao administrador para ligar a leitura com IA.'):
+    'Nesta vista as imagens ficam à vista enquanto preenches.';
   var body='<p class="hint" style="margin-bottom:12px">Como chegou este serviço?</p><div class="group">'+
-    opt('img','Print ou imagem',img?'Lemos os dados de outra app, email ou mensagem':'Fica à vista enquanto preenches','img',false)+
-    opt('cam','Tirar fotografia',img?'Lemos os dados de uma folha em papel ou escrita à mão':'De uma folha em papel, fica à vista enquanto preenches','cam',false)+
-    opt('txt','Colar texto',on?'Lemos os dados de uma mensagem de WhatsApp ou de um email':'A mensagem fica à vista enquanto preenches','txt',false)+
+    opt('img','Print ou imagem',full?'Lemos os dados de outra app, email ou mensagem':basic?'Lemos o texto do print no telemóvel':'Fica à vista enquanto preenches','img',false)+
+    opt('cam','Tirar fotografia',full?'Lemos os dados de uma folha em papel ou escrita à mão':basic?'Lemos texto impresso. Letra à mão precisa da leitura com IA':'De uma folha em papel, fica à vista enquanto preenches','cam',false)+
+    opt('txt','Colar texto','Lemos os dados de uma mensagem de WhatsApp ou de um email','txt',false)+
     opt('manual','Preencher à mão','Escreves tu os dados','pen',false)+
     '</div><p class="fine">'+note+'</p>';
   var nd=ui.newDate;
@@ -3243,11 +3391,10 @@ function openChooser(){
   ui.chooser=true;
 }
 function openPasteText(){
-  var on=aiState()==='on';
   var body='<div class="f"><label for="f_paste">Cola aqui a mensagem com os dados do serviço</label><textarea id="f_paste" rows="10" placeholder="Por exemplo: amanhã às 17h00, recolha no aeroporto, voo TP 1351, 2 pessoas, para o Hotel Avenida Palace"></textarea><p class="err" id="e_paste" hidden></p></div>';
-  openSheet('Colar texto',body,'<button type="button" class="btn" data-act="read">'+(on?'Ler serviço':'Continuar')+'</button>',{
+  openSheet('Colar texto',body,'<button type="button" class="btn" data-act="read">Ler serviço</button>',{
     read:function(){var t=$('#f_paste').value.trim();if(!t){var e=$('#e_paste');e.textContent='Cola primeiro a mensagem.';e.hidden=false;return;}
-      if(on)runExtract({kind:'texto',text:t});else{ui.chooser=false;openEditor(null,null,{src:'texto',ref:true,refText:t});}}
+      runExtract({kind:'texto',text:t});}
   });
   try{$('#f_paste').focus();}catch(e){}
 }
@@ -3301,9 +3448,16 @@ function showExtractError(code,o){
     invalid_json:'Não encontrei um serviço '+what+'. Tenta uma imagem mais nítida ou preenche à mão.',
     empty_completion:'Não encontrei um serviço '+what+'. Tenta uma imagem mais nítida ou preenche à mão.',
     refused:'Não foi possível ler '+what+'. Preenche à mão.',
-    empty:'Não encontrei um serviço '+what+'. Tenta uma imagem mais nítida ou preenche à mão.'
+    empty:'Não encontrei um serviço '+what+'. Tenta uma imagem mais nítida ou preenche à mão.',
+    bad_key:'A chave da API não é válida. Revê-a em Gestão, Definições, Leitura automática.',
+    no_key:'A leitura com IA não está ligada neste telemóvel.',
+    no_credit:'A conta da API ficou sem saldo. Carrega-a na consola da Anthropic.',
+    overloaded:'O serviço de IA está ocupado. Tenta outra vez daqui a pouco.',
+    offline:'Sem ligação à internet. Tenta outra vez ou preenche à mão.',
+    ocr_failed:'Não foi possível preparar a leitura no telemóvel. Verifica a ligação à internet na primeira utilização.',
+    api_error:'A leitura com IA falhou'+(o.detail?': '+o.detail:'.')
   }[code];
-  if(PERMANENT.indexOf(code)>-1){aiOff=true;msg=msg||'A leitura automática não está disponível nesta conta.';}
+  if(PERMANENT.indexOf(code)>-1&&readerKind()==='claude'){aiOff=true;msg=msg||'A leitura automática não está disponível nesta conta.';}
   if(code==='images_unavailable')imagesOK=false;
   msg=msg||'A ligação falhou. Tenta outra vez.';
   var img=o.file&&ui.imgURL?'<img class="thumb lg" src="'+ui.imgURL+'" alt="Imagem enviada" style="margin-top:14px">':'';
@@ -3313,31 +3467,43 @@ function showExtractError(code,o){
 }
 function runExtract(o){
   ui.chooser=false;
-  if(!sampleFn||aiOff){showExtractError('sampling_disabled',o);return;}
+  var rk=readerKind();
+  if(o.file&&(rk==='none'||(rk==='claude'&&!imagesOK))){openWithImage(o.file,o.kind);return;}
   var url=null,small=null;
   if(o.file){if(ui.imgURL){try{URL.revokeObjectURL(ui.imgURL);}catch(e){}}url=URL.createObjectURL(o.file);ui.imgURL=url;downscale(o.file,1400).then(function(u){small=u;},function(){small=null;});}
   var ctl=new AbortController();extractCtl=ctl;
-  openSheet('A ler o serviço','<div class="reading">'+(url?'<img class="thumb lg" src="'+url+'" alt="Imagem enviada">':'')+'<div class="loadbar" aria-hidden="true"><span></span></div><p>A ler os dados '+(o.kind==='texto'?'da mensagem':'da imagem')+'. Pode demorar até um minuto.</p></div>',
+  var waitTxt=rk==='basic'&&o.file?'A ler o texto da imagem no telemóvel. Na primeira vez demora mais, porque descarrega o leitor.':'A ler os dados '+(o.kind==='texto'?'da mensagem':'da imagem')+'. Pode demorar até um minuto.';
+  openSheet('A ler o serviço','<div class="reading">'+(url?'<img class="thumb lg" src="'+url+'" alt="Imagem enviada">':'')+'<div class="loadbar" aria-hidden="true"><span></span></div><p id="readMsg">'+waitTxt+'</p></div>',
     '<button type="button" class="btn alt" data-act="stop">Parar</button>',
     {stop:function(){ctl.abort();openChooser();}},
     function(){ctl.abort();});
-  var opts={signal:ctl.signal,modelTier:'default'};
-  if(o.file)opts.images=[o.file];
-  sampleFn.json(extractPrompt(o.kind,o.text),opts).then(function(raw){
+  var seen='',job;
+  if(rk==='claude'){var opts={signal:ctl.signal,modelTier:'default'};if(o.file)opts.images=[o.file];job=sampleFn.json(extractPrompt(o.kind,o.text),opts);}
+  else if(rk==='api')job=(o.file?downscale(o.file,1568):Promise.resolve(null)).then(function(du){return apiExtract(extractPrompt(o.kind,o.text),du,ctl.signal);});
+  else{
+    ocrProgress=function(m){var el=$('#readMsg');if(el&&m&&m.status==='recognizing text')el.textContent='A ler o texto da imagem: '+Math.round((m.progress||0)*100)+' %';};
+    job=(o.file?ocrText(o.file):Promise.resolve(o.text||'')).then(function(t){seen=t;return basicParse(t);});
+  }
+  job.then(function(raw){
     if(ctl.signal.aborted||extractCtl!==ctl)return;
     extractCtl=null;
-    var data=normalize(raw);
-    if(!data||!(data.pickup||data.dropoff||data.name||data.time)){showExtractError('empty',o);return;}
+    var data=normalize(raw),basic=rk==='basic'||rk==='none';
+    var found=data&&(data.pickup||data.dropoff||data.name||data.time||data.flight||data.date);
+    if(!found){
+      if(basic){openEditor(null,null,{src:o.kind,img:url,imgData:small,ref:true,refText:seen||o.text||''});return;}
+      showExtractError('empty',o);return;
+    }
     var keys=Object.keys(data);
-    openEditor(null,data,{aiKeys:{has:function(k){return keys.indexOf(k)>-1;}},src:o.kind,img:url,imgData:small});
+    openEditor(null,data,{aiKeys:{has:function(k){return keys.indexOf(k)>-1;}},src:o.kind,img:url,imgData:small,basic:basic,seenText:basic?(seen||o.text||''):''});
   },function(e){
     if(extractCtl===ctl)extractCtl=null;
     var code=e&&e.code;
     if(code==='cancelled'||ctl.signal.aborted)return;
+    o.detail=e&&e.detail;
     showExtractError(code,o);
   });
 }
-function withImage(f,kind){if(aiState()==='on'&&imagesOK)runExtract({kind:kind,file:f});else openWithImage(f,kind);}
+function withImage(f,kind){var rk=readerKind();if((rk==='claude'&&imagesOK)||rk==='api'||rk==='basic')runExtract({kind:kind,file:f});else openWithImage(f,kind);}
 function openWithImage(f,kind){
   ui.chooser=false;if(ui.imgURL){try{URL.revokeObjectURL(ui.imgURL);}catch(e){}}
   var url=URL.createObjectURL(f);ui.imgURL=url;
