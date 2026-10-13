@@ -598,7 +598,8 @@ var DONE=['concluido','no_show'];
 function defaultSettings(){
   return {types:DEF_TYPES.map(function(t){return {name:t[0],dur:t[1]};}),defaultDur:60,buffer:15,wait:60,
     payByCat:{'Carro':10,'Carro Executive':12,'Van':12,'Van VIP':15},payExample:true,payRules:[],
-    company:{name:'',nif:'',address:'',phone:'',email:''},vat:6,clientTerms:0,theme:'auto'};
+    company:{name:'',nif:'',address:'',phone:'',email:''},vat:6,clientTerms:0,theme:'auto',
+    channels:['WhatsApp','Telefone','Email','Site','Instagram','Presencial']};
 }
 
 /* ---------- example data ---------- */
@@ -610,6 +611,8 @@ function seed(){
     {id:'p1',name:'Arrivals Lisboa',company:'Arrivals Lisboa, Lda.',nif:'',phone:'+351 900 000 101',email:'reservas@arrivals-lisboa.example',address:'',terms:30,gives:true,does:false,notes:'Envia os serviços pela app deles. Fatura mensal.'},
     {id:'p2',name:'Atlântico Executive',company:'Atlântico Executive Transportes, Lda.',nif:'',phone:'+351 900 000 102',email:'operacoes@atlantico-executive.example',address:'',terms:15,gives:false,does:true,notes:'Tem vans de 8 lugares e um miniautocarro de 19.'},
     {id:'p3',name:'Lusitânia Tours',company:'Lusitânia Tours, Lda.',nif:'',phone:'+351 900 000 103',email:'booking@lusitania-tours.example',address:'',terms:10,gives:true,does:false,notes:''},
+    {id:'p5',name:'Pickups App',kind:'app',company:'',nif:'',phone:'',email:'',address:'',terms:30,gives:true,does:false,notes:'Plataforma de reservas. Os serviços chegam pela app; pagam ao fim do mês.'},
+    {id:'p6',name:'Chauffeur Pro',kind:'app',company:'',nif:'',phone:'',email:'',address:'',terms:15,gives:true,does:false,notes:'Plataforma internacional de motoristas.'},
     {id:'p4',name:'Sete Colinas Transfers',company:'Sete Colinas Transfers, Lda.',nif:'',phone:'+351 900 000 104',email:'dispatch@setecolinas.example',address:'',terms:30,gives:true,does:true,notes:'Trocamos serviços nos dois sentidos.'}
   ];
   var vehicles=[
@@ -702,7 +705,7 @@ function seed(){
         var pu=ev==='Chegada aeroporto'?ARR:hotel;
         var dof=ev==='Partida aeroporto'?DEP:ev==='Transfer'?HOT[(hi+3)%HOT.length]:hotel;
         var vId=pick(DV[dId]),cat=CAT[vId];
-        var ro=rnd(),origin=ro<0.58?'p1':ro<0.78?'direct':ro<0.93?'p3':'p4';
+        var ro=rnd(),origin=ro<0.4?'p1':ro<0.55?'p5':ro<0.63?'p6':ro<0.8?'direct':ro<0.93?'p3':'p4';
         var ext=rnd()<0.07,canc=!ext&&rnd()<0.03,ns=!canc&&rnd()<0.06;
         var em=mins(tm0)+(ns?60:75),endT=pad(Math.floor(em/60))+':'+pad(em%60);
         var base=BASE[ev][cat]+r5(rnd()*10);
@@ -711,7 +714,7 @@ function seed(){
           channel:origin==='direct'?pick(['Telefone','WhatsApp','Email']):'App do parceiro',src:origin==='direct'?'manual':'print',seenByDriver:true});
         s.checked=Math.min(s.pax,2);s.cabin=1;
         if(origin==='direct'){s.origin='direct';s.billName=s.name;s.price=r5(base*1.06);s.priceVat='com';}
-        else{s.origin='partner';s.originPartnerId=origin;s.pref=({p1:'AL-5',p3:'LT-2',p4:'SC-7'})[origin]+(4000+refN);s.price=base;}
+        else{s.origin='partner';s.originPartnerId=origin;s.pref=({p1:'AL-5',p3:'LT-2',p4:'SC-7',p5:'PK-3',p6:'CP-8'})[origin]+(4000+refN);s.price=base;}
         s.history.push(H('criado',at(prevDay,'20:50'),by,SRC[s.src]));
         if(ext){
           s.exec='ext';s.execPartnerId='p2';s.cost=r5(base*0.7);s.status='concluido';s.sentAt=null;
@@ -774,13 +777,13 @@ function seed(){
   ];
   var notices=[{id:'n1',at:at(t,'08:00'),by:'m1',to:'all',text:'Amanhã há um casamento em Évora. Fato escuro e gravata, por favor.'}];
   settings.payRules=[{id:uid(),driverId:'d3',type:'Chegada aeroporto',cat:'',origin:'',amount:7,from:t}];
-  return {v:6,role:'m1',masters:masters,partners:partners,vehicles:vehicles,drivers:drivers,services:services,settings:settings,unavail:unavail,priv:priv,genExp:genExp,driverPays:driverPays,notices:notices,noticeSeen:{},audit:audit};
+  return {v:7,role:'m1',masters:masters,partners:partners,vehicles:vehicles,drivers:drivers,services:services,settings:settings,unavail:unavail,priv:priv,genExp:genExp,driverPays:driverPays,notices:notices,noticeSeen:{},audit:audit};
 }
 
 /* ---------- state ---------- */
 var S=null;
 try{var raw=localStorage.getItem(LS);if(raw)S=JSON.parse(raw);}catch(e){S=null;}
-if(!S||S.v!==6||!Array.isArray(S.services))S=seed();
+if(!S||S.v!==7||!Array.isArray(S.services))S=seed();
 (function fill(){
   var d=defaultSettings();S.settings=S.settings||d;
   Object.keys(d).forEach(function(k){if(S.settings[k]==null)S.settings[k]=d[k];});
@@ -796,6 +799,8 @@ var ui={mtab:'servicos',dtab:'servicos',filter:'acao',q:'',sf:{origin:'',exec:''
 function applyTheme(){var th=S.settings.theme;if(th==='dark'||th==='light')document.documentElement.setAttribute('data-theme',th);else document.documentElement.removeAttribute('data-theme');}
 
 /* ---------- lookups ---------- */
+function isApp(p){return !!p&&p.kind==='app';}
+function originLabel(s){if(s.origin==='partner')return pName(s.originPartnerId)||'Parceiro';return 'Cliente direto'+(s.channel?', '+s.channel:'');}
 function live(arr){return arr.filter(function(x){return !x.removed;});}
 function veh(id){return id?S.vehicles.find(function(v){return v.id===id;})||null:null;}
 function drv(id){return id?S.drivers.find(function(d){return d.id===id;})||null:null;}
@@ -811,6 +816,7 @@ function log(s,st,by,note,money){s.history=s.history||[];s.history.push({s:st,at
 function audit(text,money){S.audit.push({at:nowISO(),by:S.role,text:text,money:!!money});}
 function nextRef(){var mx=2040;S.services.forEach(function(s){var m=/^TR-(\d+)$/.exec(s.ref||'');if(m)mx=Math.max(mx,+m[1]);});return 'TR-'+(mx+1);}
 function typeNames(){return S.settings.types.map(function(t){return t.name;});}
+function typeEN(n){var t=S.settings.types.filter(function(x){return x.name===n;})[0];return (t&&t.en)||EVENTS_EN[n]||n||'Transfer';}
 function typeDur(n){var t=S.settings.types.find(function(x){return x.name===n;});return t?Number(t.dur)||S.settings.defaultDur:S.settings.defaultDur;}
 function isExt(s){return s.exec==='ext';}
 function assigned(s){return isExt(s)?!!s.execPartnerId:!!(s.driverId&&s.vehicleId);}
@@ -1551,7 +1557,7 @@ function finHead(title){
 function breakdown(list){
   var o={},e={};
   list.forEach(function(s){
-    var f=fin(s),ko=s.origin==='partner'?s.originPartnerId:'_direct',ke=isExt(s)?(s.execPartnerId||'_none'):'_team';
+    var f=fin(s),ko=s.origin==='partner'?s.originPartnerId:'_direct:'+(s.channel||''),ke=isExt(s)?(s.execPartnerId||'_none'):'_team';
     var a=o[ko]||(o[ko]={n:0,sale:0,margin:0});a.n++;a.sale+=f.saleNet;a.margin+=f.margin;
     var b=e[ke]||(e[ke]={n:0,cost:0,margin:0});b.n++;b.cost+=isExt(s)?f.costM:(f.pay+f.exp);b.margin+=f.margin;
   });
@@ -1591,7 +1597,7 @@ function renderFinancas(){
     '</div>');
   if(A.n){
     var bd=breakdown(A.list),ko=Object.keys(bd.o).sort(function(a,b){return bd.o[b].n-bd.o[a].n;}),ke=Object.keys(bd.e).sort(function(a,b){return bd.e[b].n-bd.e[a].n;});
-    function nm(k){return k==='_direct'?'Clientes diretos':k==='_team'?'A nossa equipa':k==='_none'?'Parceiro por escolher':pName(k);}
+    function nm(k){return k.indexOf('_direct:')===0?'Clientes diretos'+(k.length>8?', '+k.slice(8):''):k==='_team'?'A nossa equipa':k==='_none'?'Parceiro por escolher':pName(k);}
     var inner='<div class="more-b flush"><div class="brow" style="padding-bottom:6px"><small>De onde vêm</small></div>'+ko.map(function(k){var x=bd.o[k];return '<div class="brow"><span>'+esc(nm(k))+'<small>'+plural(x.n,'serviço','serviços')+', vendas '+eur(x.sale)+'</small></span><span class="v">'+eur(x.margin)+'</span></div>';}).join('')+
       '<div class="brow" style="padding-bottom:6px"><small>Quem faz</small></div>'+ke.map(function(k){var x=bd.e[k];return '<div class="brow"><span>'+esc(nm(k))+'<small>'+plural(x.n,'serviço','serviços')+', custos '+eur(x.cost)+'</small></span><span class="v">'+eur(x.margin)+'</span></div>';}).join('')+'</div>';
     h+='<details class="more" style="margin-top:26px"><summary><span>Margem por origem e por quem faz</span></summary>'+inner+'</details>';
@@ -1609,7 +1615,7 @@ function renderAtividade(){
   var act=list.filter(function(s){return s.status!=='cancelado';}),done=act.filter(function(s){return DONE.indexOf(s.status)>-1;}),ns=done.filter(function(s){return s.status==='no_show';}).length,canc=list.length-act.length;
   var h=finHead('Atividade');
   h+='<div class="hero"><span class="k">Serviços no período</span><span class="v">'+act.length+'</span><span class="c">'+plural(done.length,'feito','feitos')+(ns?', '+plural(ns,'cliente não apareceu','clientes não apareceram'):'')+(canc?', '+plural(canc,'cancelado','cancelados'):'')+'.</span></div>';
-  var o={},e={};act.forEach(function(s){var a=s.origin==='partner'?pName(s.originPartnerId):'Clientes diretos';o[a]=(o[a]||0)+1;var b=isExt(s)?(s.execPartnerId?pName(s.execPartnerId)+' (parceiro)':'Parceiro por escolher'):((drv(s.driverId)||{name:'Sem driver'}).name);e[b]=(e[b]||0)+1;});
+  var o={},e={};act.forEach(function(s){var a=s.origin==='partner'?pName(s.originPartnerId):'Clientes diretos'+(s.channel?', '+s.channel:'');o[a]=(o[a]||0)+1;var b=isExt(s)?(s.execPartnerId?pName(s.execPartnerId)+' (parceiro)':'Parceiro por escolher'):((drv(s.driverId)||{name:'Sem driver'}).name);e[b]=(e[b]||0)+1;});
   function rows(m){return Object.keys(m).sort(function(a,b){return m[b]-m[a];}).map(function(k){return '<div class="brow"><span>'+esc(k)+'</span><span class="v">'+m[k]+'</span></div>';}).join('');}
   if(act.length){h+=sec('De onde vêm','<div class="group">'+rows(o)+'</div>');h+=sec('Quem faz','<div class="group">'+rows(e)+'</div>');h+='<div class="sec"><button type="button" class="btn alt" data-act="fCsv">Exportar para Excel</button></div>';}
   else h+='<div class="empty"><b>Sem serviços neste período</b>Escolhe outro período acima.</div>';
@@ -1643,15 +1649,15 @@ function exportFin(){
 }
 
 /* ---------- master: management ---------- */
-function partnerRoles(p){var r=[];if(p.gives)r.push('entrega-nos serviços');if(p.does)r.push('faz serviços para nós');return r.length?cap(r.join(' e ')):'Parceiro';}
+function partnerRoles(p){var r=[];if(p.gives)r.push('entrega-nos serviços');if(p.does)r.push('faz serviços para nós');var t=r.length?r.join(' e '):'';return isApp(p)?'App'+(t?', '+t:''):(t?cap(t):'Parceiro');}
 function renderGestao(){
   var P=live(S.partners),D=live(S.drivers),V=live(S.vehicles),cm=canMoney(),st=S.settings,co=st.company;
   var h=pageH('Gestão');
-  h+=sec('Parceiros','<div class="group">'+P.map(function(p){
+  h+=sec('Parceiros e apps','<div class="group">'+P.map(function(p){
     var sub='<span class="s">'+esc(partnerRoles(p))+'</span>';
     if(cm){var x=partnerData(p.id),bits=[];if(x.owe>0)bits.push('Deve-nos '+eur(x.owe));if(x.we>0)bits.push('devemos '+eur(x.we));if(bits.length)sub+='<span class="s'+(x.ov>0?' attn':'')+'">'+esc(cap(bits.join(', ')))+(x.ov>0?', com '+eur(x.ov)+' em atraso':'')+'</span>';}
     return '<button type="button" class="nrow" data-act="pt" data-id="'+esc(p.id)+'"><span><b style="font-weight:600;font-size:17px">'+esc(p.name)+'</b>'+sub+'</span>'+I_CHEV+'</button>';
-  }).join('')+'<button type="button" class="add" data-act="np">Adicionar parceiro</button></div>');
+  }).join('')+'<button type="button" class="add" data-act="np">Adicionar parceiro ou app</button></div>');
   h+=sec('Drivers','<div class="group">'+D.map(function(d){
     var di=docIssues(d),flag=di.length?'<span class="s '+(di.some(function(x){return x.st.k==='bad';})?'bad':'attn')+'">'+esc(cap(di[0].doc.type.toLowerCase())+' '+di[0].st.txt)+(di.length>1?' e mais '+(di.length-1):'')+'</span>':'';
     return '<div class="frow"><button type="button" class="frow-main" data-act="ed" data-id="'+esc(d.id)+'"><b>'+esc(d.name)+'</b>'+(d.tags.length?'<span class="tags">'+d.tags.map(function(t){return '<span class="tag">'+esc(t)+'</span>';}).join('')+'</span>':'')+flag+(d.on?'':'<span class="s">Indisponível</span>')+'</button><label class="sw"><input type="checkbox" role="switch" data-sw="drv" data-id="'+esc(d.id)+'"'+(d.on?' checked':'')+' aria-label="'+esc(d.name)+' disponível"></label></div>';
@@ -1662,7 +1668,7 @@ function renderGestao(){
     var flags=(nb?'<span class="s attn">Manutenção '+esc(blockLabel(nb))+'</span>':'')+(di.length?'<span class="s '+(di.some(function(x){return x.st.k==='bad';})?'bad':'attn')+'">'+esc(cap(di[0].doc.type.toLowerCase())+' '+di[0].st.txt)+(di.length>1?' e mais '+(di.length-1):'')+'</span>':'');
     return '<div class="frow"><button type="button" class="frow-main" data-act="ev" data-id="'+esc(v.id)+'"><b>'+esc(v.name)+'</b><span class="s">'+esc(spec)+'</span>'+flags+(v.on?'':'<span class="s">Indisponível</span>')+'</button><label class="sw"><input type="checkbox" role="switch" data-sw="veh" data-id="'+esc(v.id)+'"'+(v.on?' checked':'')+' aria-label="'+esc(v.name)+' disponível"></label></div>';
   }).join('')+'<button type="button" class="add" data-act="nv">Adicionar veículo</button></div>');
-  var items=[['types','Tipos de serviço e durações','Para os avisos de horário e o “não apareceu”']];
+  var items=[['types','Tipos de serviço','Nomes, durações e tipos novos'],['src','Origens dos serviços','Canais diretos, apps e parceiros']];
   if(cm)items.push(['money','Valores, IVA e prazos',st.payExample?'Valores dos drivers de exemplo, por mudar':'IVA de '+st.vat+' %, valores dos drivers']);
   items.push(['co','Dados da empresa',co.name||'Para a service sheet e as faturas']);
   if(isAdmin())items.push(['access','Acessos','Quem vê valores e finanças']);
@@ -2037,6 +2043,7 @@ function applySetting(t){
   if(k.indexOf('co:')===0){st.company[k.slice(3)]=t.value.trim();save();$('#brandName').textContent=st.company.name||'Despacho';return;}
   if(k.indexOf('pay:')===0){var c=k.slice(4);if(t.value===''){st.payByCat[c]='';}else{var pv=parseFloat(t.value);if(!isFinite(pv)||pv<0){t.value=st.payByCat[c];return;}st.payByCat[c]=pv;}st.payExample=false;save();return;}
   if(k==='vat'){st.vat=Number(t.value);save();return;}
+  if(k.indexOf('chan:')===0){var ci=+k.slice(5),chl=st.channels,oldc=chl[ci],nv=cap(t.value.trim());if(!nv||chl.some(function(c,j){return j!==ci&&norm(c)===norm(nv);})){t.value=oldc;return;}if(nv!==oldc){chl[ci]=nv;S.services.forEach(function(x){if(x.channel===oldc)x.channel=nv;});audit('Canal renomeado: '+oldc+' para '+nv);save();}return;}
   if(k.indexOf('type:')===0){var ty=st.types.find(function(x){return x.name===k.slice(5);}),n2=parseInt(t.value,10);if(!ty||!isFinite(n2)||n2<5){t.value=ty?ty.dur:'';return;}ty.dur=n2;save();return;}
   if(k.indexOf('mname:')===0){var m=master(k.slice(6));if(m&&t.value.trim()){m.name=t.value.trim();save();}return;}
   if(k.indexOf('mmoney:')===0){var m2=master(k.slice(7));if(m2&&!m2.admin){m2.money=t.checked;audit((t.checked?'Acesso às finanças dado a ':'Acesso às finanças retirado a ')+m2.name);save();}return;}
@@ -2050,19 +2057,30 @@ function openSettings(k){
   var st=S.settings,co=st.company,title,body,foot='<button type="button" class="btn" data-act="done">Feito</button>',acts={};
   var reopen=function(){openSettings(k);};
   if(k==='types'){
-    title='Tipos de serviço e durações';
-    var used={};S.services.forEach(function(s){if(s.event)used[s.event]=1;});
-    body='<p class="hint" style="margin-bottom:18px">Quanto tempo, em média, cada tipo ocupa o driver e o veículo, em minutos. Em cada serviço podes pôr a hora de fim prevista.</p><div class="lbox">'+
-      st.types.map(function(t,i){return '<div class="lrow"><div class="f"><label for="ty_'+i+'">'+esc(t.name)+'</label></div><input id="ty_'+i+'" type="number" min="5" step="5" inputmode="numeric" data-set="type:'+esc(t.name)+'" value="'+esc(t.dur)+'" aria-label="'+esc(t.name)+', minutos">'+(used[t.name]?'<span style="width:36px"></span>':'<button type="button" class="icbtn" data-act="rmType" data-n="'+esc(t.name)+'" aria-label="Remover '+esc(t.name)+'">'+I_X+'</button>')+'</div>';}).join('')+'</div>'+
-      '<div class="g21" style="margin-top:18px"><div class="f"><label for="nt_name">Novo tipo</label><input id="nt_name" type="text" placeholder="Por exemplo, Golfe"></div><div class="f"><label for="nt_dur">Minutos</label><input id="nt_dur" type="number" min="5" step="5" inputmode="numeric" value="60"></div></div>'+
-      '<button type="button" class="btn alt sm" data-act="addType" style="margin-top:10px">Adicionar tipo</button><p class="err" id="e_nt" hidden></p>'+
-      '<div style="display:grid;gap:14px;margin-top:26px">'+numField('du_def','Sem tipo (min)','def',st.defaultDur)+numField('du_buf','Intervalo mínimo entre serviços (min)','buf',st.buffer)+numField('du_wait','Tempo de espera pelo cliente (min)','wait',st.wait)+
+    title='Tipos de serviço';
+    var used={};S.services.forEach(function(x){if(x.event)used[x.event]=(used[x.event]||0)+1;});
+    body='<p class="hint" style="margin-bottom:14px">Toca num tipo para lhe mudar o nome, a duração ou o apagar. A duração é o tempo médio que ocupa o driver e o veículo.</p><div class="group">'+
+      st.types.map(function(t){return '<button type="button" class="nrow" data-act="tyEdit" data-n="'+esc(t.name)+'"><span>'+esc(t.name)+'<span class="s">'+esc(fmtMin(+t.dur||st.defaultDur)+(used[t.name]?', '+plural(used[t.name],'serviço','serviços'):''))+'</span></span>'+I_CHEV+'</button>';}).join('')+'</div>'+
+      '<button type="button" class="btn alt sm" data-act="tyNew" style="margin-top:12px">Adicionar tipo</button>'+
+      '<div style="display:grid;gap:14px;margin-top:28px">'+numField('du_def','Duração sem tipo (min)','def',st.defaultDur)+numField('du_buf','Intervalo mínimo entre serviços (min)','buf',st.buffer)+numField('du_wait','Tempo de espera pelo cliente (min)','wait',st.wait)+
       '<p class="hint">Depois do tempo de espera, o driver pode marcar que o cliente não apareceu.</p></div>';
-    acts.addType=function(){var n=$('#nt_name').value.trim(),d=parseInt($('#nt_dur').value,10),e=$('#e_nt');
-      if(!n){e.textContent='Escreve o nome do tipo.';e.hidden=false;return;}
-      if(st.types.some(function(t){return norm(t.name)===norm(n);})){e.textContent='Esse tipo já existe.';e.hidden=false;return;}
-      st.types.push({name:cap(n),dur:isFinite(d)&&d>=5?d:60});save();reopen();toast('Tipo adicionado');};
-    acts.rmType=function(el){st.types=st.types.filter(function(t){return t.name!==el.dataset.n;});save();reopen();toast('Tipo removido');};
+    acts.tyEdit=function(el){openTypeForm(el.dataset.n,reopen);};
+    acts.tyNew=function(){openTypeForm(null,reopen);};
+  }else if(k==='src'){
+    title='Origens dos serviços';
+    var chs=st.channels||(st.channels=[]),cnt={};S.services.forEach(function(x){if(x.origin==='direct'&&x.channel)cnt[x.channel]=(cnt[x.channel]||0)+1;});
+    var PA=live(S.partners).filter(function(p){return p.gives;});
+    body='<p class="hint" style="margin-bottom:16px">É o que aparece em De onde vem, quando registas um serviço. Um toque e fica escolhido.</p>'+
+      '<h3 style="margin:0 0 8px;font:600 17px/1.3 var(--f-body)">Apps e parceiros que nos entregam serviços</h3>'+
+      (PA.length?'<div class="group">'+PA.map(function(p){return '<button type="button" class="nrow" data-act="srcP" data-id="'+esc(p.id)+'"><span>'+esc(p.name)+'<span class="s">'+(isApp(p)?'App':'Empresa parceira')+'</span></span>'+I_CHEV+'</button>';}).join('')+'</div>':'<p class="hint">Ainda sem nenhum.</p>')+
+      '<button type="button" class="btn alt sm" data-act="srcPNew" style="margin-top:10px">Adicionar app ou parceiro</button>'+
+      '<h3 style="margin:28px 0 4px;font:600 17px/1.3 var(--f-body)">Canais de clientes diretos</h3><p class="hint" style="margin-bottom:10px">Por onde os clientes diretos vos contactam. Podes mudar o nome: os serviços antigos acompanham.</p>'+
+      '<div class="lbox">'+chs.map(function(c,i){return '<div class="lrow" style="grid-template-columns:minmax(0,1fr) auto"><input type="text" data-set="chan:'+i+'" value="'+esc(c)+'" aria-label="Canal '+(i+1)+'">'+(cnt[c]?'<span class="hint" style="width:36px;text-align:center" title="Em uso">'+cnt[c]+'</span>':'<button type="button" class="icbtn" data-act="chRm" data-i="'+i+'" aria-label="Remover '+esc(c)+'">'+I_X+'</button>')+'</div>';}).join('')+'</div>'+
+      '<div class="g21" style="margin-top:14px"><div class="f"><label for="ch_new">Novo canal</label><input id="ch_new" type="text" placeholder="Por exemplo, TikTok"></div><button type="button" class="btn alt sm" data-act="chAdd">Adicionar</button></div><p class="err" id="e_ch" hidden></p>';
+    acts.srcP=function(el){openPartnerEditor(el.dataset.id,reopen);};
+    acts.srcPNew=function(){openPartnerEditor(null,reopen);};
+    acts.chAdd=function(){var n=cap($('#ch_new').value.trim()),e=$('#e_ch');if(!n){e.textContent='Escreve o nome do canal.';e.hidden=false;return;}if(chs.some(function(c){return norm(c)===norm(n);})){e.textContent='Esse canal já existe.';e.hidden=false;return;}chs.push(n);audit('Canal criado: '+n);save();reopen();toast('Canal adicionado');};
+    acts.chRm=function(el){var c=chs[+el.dataset.i];chs.splice(+el.dataset.i,1);audit('Canal removido: '+c);save();reopen();toast('Canal removido');};
   }else if(k==='money'){
     title='Valores, IVA e prazos';
     body='<div style="display:grid;gap:14px"><div class="f"><label for="mv_vat">Taxa de IVA por omissão</label><select id="mv_vat" data-set="vat">'+VAT_RATES.map(function(r){return '<option value="'+r+'"'+(r===Number(st.vat)?' selected':'')+'>'+r+' %</option>';}).join('')+'</select></div>'+
@@ -2139,6 +2157,54 @@ function openRuleForm(id,pre,back){
       save();toast('Valor guardado');if(back)back();else closeSheet();
     },
     ruRm:function(){S.settings.payRules=payRules().filter(function(y){return y.id!==id;});audit('Valor especial removido: '+ruleWho(r)+', '+eur(r.amount),true);save();toast('Valor removido');if(back)back();else closeSheet();}
+  },function(){render();});
+}
+function typeObj(n){return S.settings.types.filter(function(t){return t.name===n;})[0]||null;}
+function renameType(a,b){
+  var t=typeObj(a);if(!t)return;if(!t.en&&EVENTS_EN[a])t.en=EVENTS_EN[a];t.name=b;
+  S.services.forEach(function(x){if(x.event===a)x.event=b;});
+  S.drivers.concat(S.vehicles).forEach(function(o){if(Array.isArray(o.types))o.types=o.types.map(function(y){return y===a?b:y;});});
+  payRules().forEach(function(r){if(r.type===a)r.type=b;});
+  if(ui.ff&&ui.ff.type===a)ui.ff.type=b;
+}
+function removeType(a,to){
+  S.services.forEach(function(x){if(x.event===a)x.event=to||'';});
+  S.drivers.concat(S.vehicles).forEach(function(o){if(Array.isArray(o.types))o.types=o.types.filter(function(y){return y!==a;});});
+  payRules().forEach(function(r){if(r.type===a)r.type=to||'';});
+  S.settings.types=S.settings.types.filter(function(t){return t.name!==a;});
+  if(ui.ff&&ui.ff.type===a)ui.ff.type='';
+}
+function openTypeForm(name,back){
+  var t=name?typeObj(name):null,st=S.settings;
+  var n=t?S.services.filter(function(x){return x.event===t.name;}).length:0;
+  var others=st.types.filter(function(x){return !t||x.name!==t.name;});
+  var body='<form novalidate style="display:grid;gap:16px">'+
+    '<div class="f"><label for="ty_name">Nome</label><input id="ty_name" type="text" value="'+esc(t?t.name:'')+'" placeholder="Por exemplo, Golfe"></div>'+
+    '<div class="f"><label for="ty_en">Nome em inglês, para a service sheet</label><input id="ty_en" type="text" value="'+esc(t?(t.en||EVENTS_EN[t.name]||''):'')+'" placeholder="Por exemplo, Golf transfer"></div>'+
+    '<div class="f"><label for="ty_dur">Duração média (min)</label><input id="ty_dur" type="number" min="5" step="5" inputmode="numeric" value="'+esc(t?t.dur:60)+'"></div>'+
+    (t&&n?'<p class="hint">Usado em '+plural(n,'serviço','serviços')+'. Se mudares o nome, esses serviços, as fichas dos drivers e veículos e os valores especiais passam a usar o nome novo.</p>':'')+
+    (!t?'<p class="hint">Todos os drivers e veículos ficam habilitados para o tipo novo. Tira-o na ficha de quem não o faz.</p>':'')+
+    '<p class="err" id="e_ty" hidden></p></form>'+
+    (t?'<div class="sec"><h3 style="margin:0 0 6px;font:600 17px/1.3 var(--f-body)">Apagar este tipo</h3>'+(n?'<p class="hint" style="margin-bottom:10px">Os '+plural(n,'serviço passa','serviços passam')+' para:</p><select id="ty_to">'+others.map(function(o){return '<option value="'+esc(o.name)+'">'+esc(o.name)+'</option>';}).join('')+'<option value="">Sem tipo</option></select>':'<p class="hint" style="margin-bottom:10px">Não há serviços com este tipo.</p>')+
+      '<button type="button" class="btn alt danger sm" data-act="tyRm" style="margin-top:10px">Apagar '+esc(t.name)+'</button></div>':'');
+  openSheet(t?t.name:'Novo tipo',body,'<button type="button" class="btn" data-act="tySave">Guardar</button>'+(back?'<button type="button" class="tbtn muted" data-act="back">Voltar</button>':''),{
+    back:back,
+    tySave:function(){
+      var nm=$('#ty_name').value.trim().replace(/\s+/g,' '),en=$('#ty_en').value.trim(),d=parseInt($('#ty_dur').value,10),e=$('#e_ty');
+      if(!nm){e.textContent='Escreve o nome do tipo.';e.hidden=false;return;}
+      if(st.types.some(function(x){return x!==t&&norm(x.name)===norm(nm);})){e.textContent='Já existe um tipo com esse nome.';e.hidden=false;return;}
+      if(!isFinite(d)||d<5){e.textContent='A duração tem de ter pelo menos 5 minutos.';e.hidden=false;return;}
+      nm=cap(nm);
+      if(t){var old=t.name;if(old!==nm){renameType(old,nm);audit('Tipo de serviço renomeado: '+old+' para '+nm);}t.en=en;t.dur=d;}
+      else{st.types.push({name:nm,en:en,dur:d});S.drivers.concat(S.vehicles).forEach(function(o){if(Array.isArray(o.types))o.types.push(nm);});audit('Tipo de serviço criado: '+nm);}
+      save();toast(t?'Tipo guardado':'Tipo adicionado');if(back)back();else closeSheet();
+    },
+    tyRm:function(){
+      var to=$('#ty_to')?$('#ty_to').value:'';
+      $('#sheetFoot').innerHTML='<p class="foot-hint">Apagar '+esc(t.name)+(n?'? Os '+plural(n,'serviço passa','serviços passam')+' para '+esc(to||'sem tipo')+'.':'?')+'</p><div class="row2"><button type="button" class="btn alt" data-act="tyRmNo">Voltar</button><button type="button" class="btn danger" data-act="tyRmYes" data-to="'+esc(to)+'">Apagar</button></div>';
+    },
+    tyRmNo:function(){openTypeForm(name,back);},
+    tyRmYes:function(el){var nm0=t.name;removeType(nm0,el.dataset.to);audit('Tipo de serviço apagado: '+nm0+(el.dataset.to?', serviços passaram para '+el.dataset.to:''));save();toast('Tipo apagado');if(back)back();else closeSheet();}
   },function(){render();});
 }
 function openAudit(){
@@ -2219,7 +2285,7 @@ function filesHTML(s,canEdit){
 }
 function oeHTML(s){
   var d=drv(s.driverId),v=veh(s.vehicleId);
-  var rows=kv('Vem de',s.origin==='partner'?'<b>'+esc(pName(s.originPartnerId))+'</b>'+(s.pref?'<span class="muted">, '+esc(s.pref)+'</span>':''):'Cliente direto')+
+  var rows=kv('Vem de',s.origin==='partner'?'<b>'+esc(pName(s.originPartnerId))+'</b>'+(isApp(prt(s.originPartnerId))?'<span class="muted"> (app)</span>':'')+(s.pref?'<span class="muted">, '+esc(s.pref)+'</span>':''):esc(originLabel(s)))+
     kv('Cobrar a',esc(billTo(s))+(s.billNif?'<span class="muted">, NIF '+esc(s.billNif)+'</span>':''))+
     kv('Quem faz',isExt(s)?(s.execPartnerId?'<b class="ext">'+esc(pName(s.execPartnerId))+'</b>':'<span class="flag">Parceiro por escolher</span>'):(d?esc(d.name)+(v?'<span class="muted">, '+esc(v.name)+'</span>':''):'<span class="flag">Por alocar</span>'));
   return '<div class="blk"><div class="card-b oe"><dl>'+rows+'</dl></div></div>';
@@ -2251,6 +2317,19 @@ function returnOf(s){
   var ev=s.event==='Chegada aeroporto'?'Partida aeroporto':s.event==='Partida aeroporto'?'Chegada aeroporto':s.event;
   return {date:s.date,time:'',pickup:s.dropoff,dropoff:s.pickup,name:s.name,phone:s.phone,email:s.email,ctype:s.ctype,pax:s.pax,checked:s.checked,cabin:s.cabin,booster:s.booster,vtype:s.vtype,event:ev,channel:s.channel,notes:s.notes,req:s.req,
     origin:s.origin,originPartnerId:s.originPartnerId,billName:s.billName,billNif:s.billNif,vatRate:s.vatRate,priceVat:s.priceVat};
+}
+/* Where the service came from, in one tap: a direct-client channel, an app, or a partner company. */
+function srcPickHTML(origin,pid,ch){
+  var chans=(S.settings.channels||[]).slice();if(origin==='direct'&&ch&&chans.indexOf(ch)<0)chans.push(ch);
+  var P=S.partners.filter(function(p){return (!p.removed&&p.gives)||p.id===pid;}).sort(function(a,b){return a.name.localeCompare(b.name);});
+  function chip(k,v,label,on){return '<button type="button" class="chip-btn" data-act="srcPick" data-k="'+k+'" data-v="'+esc(v)+'" aria-pressed="'+on+'">'+esc(label)+'</button>';}
+  function grp(label,items){return items.length?'<div class="f"><span class="lab">'+label+'</span><div class="chips">'+items.join('')+'</div></div>':'';}
+  var any=(origin==='direct'&&!!ch)||(origin==='partner'&&!!pid);
+  return grp('Apps',P.filter(isApp).map(function(p){return chip('partner',p.id,p.name,origin==='partner'&&pid===p.id);}))+
+    grp('Parceiros',P.filter(function(p){return !isApp(p);}).map(function(p){return chip('partner',p.id,p.name,origin==='partner'&&pid===p.id);}))+
+    grp('Cliente direto',chans.map(function(c){return chip('direct',c,c,origin==='direct'&&ch===c);}))+
+    (any?'':'<p class="hint" id="srcHint">Toca de onde veio. Sem escolha, fica como cliente direto.</p>')+
+    '<button type="button" class="tbtn" data-act="srcNew" style="justify-self:start;padding:2px 0">Outra origem</button>';
 }
 function groupedOpts(list,cur,blockFn,labelFn,rank){
   var ok=[],bad=[];
@@ -2430,7 +2509,7 @@ function openEditor(existing,prefill,opts){
   var giveO=S.partners.filter(function(p){return (!p.removed&&p.gives)||p.id===s.originPartnerId;}).map(function(p){return [p.id,p.name];});
   var doO=S.partners.filter(function(p){return (!p.removed&&p.does)||p.id===s.execPartnerId;}).map(function(p){return [p.id,p.name];});
   ui.editorPending={existing:existing||null,src:opts.src||(existing?existing.src:'manual'),origin:s.origin==='partner'?'partner':'direct',exec:isExt(s)?'ext':'int',img:opts.imgData||null};
-  var moreKeys=['ref','email','ctype','wait','channel','req'],moreOpen=moreKeys.some(function(k){return ai.has(k);})||!!s.inotes;
+  var moreKeys=['ref','email','ctype','wait','req'],moreOpen=moreKeys.some(function(k){return ai.has(k);})||!!s.inotes;
   var valOpen=ai.has('price')||!blank(s.price)||!blank(s.cost)||!blank(s.pay);
   var top='';
   if(opts.ref)top=opts.refText?'<details class="more" open style="margin:0 0 22px"><summary><span>Mensagem do pedido</span></summary><div class="more-b"><pre class="sel" style="margin:0">'+esc(opts.refText)+'</pre></div></details>':'<details class="more" open style="margin:0 0 22px"><summary><span>Imagem do pedido</span></summary><div class="more-b"><img class="ssimg" src="'+opts.img+'" alt="Imagem do pedido"></div></details>';
@@ -2449,10 +2528,14 @@ function openEditor(existing,prefill,opts){
       '<label class="check'+(ai.has('booster')?' ai':'')+'"><input type="checkbox" id="f_booster"'+(s.booster?' checked':'')+'> Precisa de cadeira de criança</label></fieldset>'+
     '<fieldset><legend>Serviço</legend><div class="g2 stack">'+F('event','Tipo de serviço',SEL('event',typeNames()))+F('vtype','Veículo pedido',SEL('vtype',VTYPES))+'</div>'+
       F('notes','Notas para o driver',T('notes',2,'Por exemplo, esperar com placa com o nome'))+'</fieldset>'+
-    '<fieldset><legend>De onde vem</legend><div class="seg in" role="group" aria-label="De onde vem"><button type="button" data-act="oSeg" data-v="direct" aria-pressed="'+(ui.editorPending.origin==='direct')+'">Cliente direto</button><button type="button" data-act="oSeg" data-v="partner" aria-pressed="'+(ui.editorPending.origin==='partner')+'">Parceiro</button></div>'+
+    '<fieldset><legend>De onde vem</legend><div id="srcPick" style="display:grid;gap:12px">'+srcPickHTML(ui.editorPending.origin,val('originPartnerId'),val('channel'))+'</div>'+
+      '<select id="f_originPartnerId" hidden><option value=""></option>'+S.partners.filter(function(p){return (!p.removed&&p.gives)||p.id===s.originPartnerId;}).map(function(p){return '<option value="'+esc(p.id)+'"'+(p.id===val('originPartnerId')?' selected':'')+'>'+esc(p.name)+'</option>';}).join('')+'</select>'+
+      '<input id="f_channel" type="hidden" value="'+esc(val('channel'))+'"><p class="err" id="e_originPartnerId" hidden></p>'+
+      '<div id="o_newsrc" class="sug" hidden style="background:var(--surface);gap:12px"><div class="f"><label for="f_srcName">Nome da nova origem</label><input id="f_srcName" type="text" placeholder="Por exemplo, Instagram, o nome da app ou da empresa"></div>'+
+        '<div class="f"><span class="lab">É</span><div class="chips">'+[['app','Uma app ou plataforma'],['partner','Uma empresa parceira'],['direct','Um canal de clientes diretos']].map(function(o,i){return '<button type="button" class="chip-btn" data-act="srcKind" data-v="'+o[0]+'" aria-pressed="'+(i===0)+'">'+o[1]+'</button>';}).join('')+'</div></div>'+
+        '<button type="button" class="btn alt sm" data-act="srcAdd">Adicionar e escolher</button><p class="err" id="e_src" hidden></p></div>'+
       '<div id="o_direct" class="g2 stack">'+F('billName','Faturar a',I('billName','text','placeholder="Em branco, o nome do cliente"'))+F('billNif','NIF, se pedir fatura',I('billNif','text','inputmode="numeric"'))+'</div>'+
-      '<div id="o_partner" style="display:grid;gap:14px">'+F('originPartnerId','Parceiro que nos entrega',OPTS('originPartnerId',giveO,'Escolher parceiro','Novo parceiro…'))+
-        '<div id="o_new" hidden>'+F('newOP','Nome do novo parceiro','<input id="f_newOP" type="text">')+'</div>'+F('pref','Referência do parceiro',I('pref','text','autocomplete="off" placeholder="O número da reserva na app ou no email deles"'))+'</div></fieldset>'+
+      '<div id="o_partner" style="display:grid;gap:14px">'+F('pref','<span id="l_pref">Referência do parceiro</span>',I('pref','text','autocomplete="off" placeholder="O número da reserva na app ou no email deles"'))+'</div></fieldset>'+
     '<fieldset id="execSet"><legend>Quem faz</legend><div class="seg in" role="group" aria-label="Quem faz"><button type="button" data-act="eSeg" data-v="int" aria-pressed="'+(ui.editorPending.exec==='int')+'">A nossa equipa</button><button type="button" data-act="eSeg" data-v="ext" aria-pressed="'+(ui.editorPending.exec==='ext')+'">Um parceiro</button></div>'+
       '<div id="e_int" style="display:grid;gap:14px"><div id="sugBox"></div>'+F('driverId','Driver',OPTS('driverId',drvO,'Escolher driver'))+'<div id="w_driver"></div>'+F('vehicleId','Veículo',OPTS('vehicleId',vehO,'Escolher veículo'))+'<div id="w_vehicle"></div></div>'+
       '<div id="e_ext" style="display:grid;gap:14px">'+F('execPartnerId','Parceiro que faz',OPTS('execPartnerId',doO,'Escolher parceiro','Novo parceiro…'))+'<div id="e_new" hidden>'+F('newEP','Nome do novo parceiro','<input id="f_newEP" type="text">')+'</div>'+
@@ -2467,7 +2550,7 @@ function openEditor(existing,prefill,opts){
     '<details class="fmore"'+(moreOpen?' open':'')+'><summary><span>Mais detalhes</span><span class="cnt">opcional</span></summary><div class="fmore-b">'+
       F('ref','Referência interna',I('ref','text','autocomplete="off"'))+F('email','Email do cliente',I('email','email'))+
       '<div class="g2 stack">'+F('ctype','Tipo de cliente',SEL('ctype',CTYPES))+F('wait','Tempo de espera (min)',I('wait','number','min="0" step="5" inputmode="numeric" placeholder="'+S.settings.wait+'"'))+'</div>'+
-      F('channel','Canal do pedido',I('channel','text','list="chList" placeholder="Telefone, WhatsApp, email"'))+'<datalist id="chList">'+CHANNELS.map(function(o){return '<option value="'+esc(o)+'">';}).join('')+'</datalist>'+
+
       F('req','Requisitos especiais',T('req',2,''))+F('inotes','Notas internas, só para o escritório',T('inotes',2,'Não aparecem ao driver nem na service sheet'))+
     '</div></details>'+
     (ui.editorPending.img&&!existing?'<label class="check"><input type="checkbox" id="f_keepImg" checked> Guardar a imagem original nos anexos</label>':'')+
@@ -2482,6 +2565,32 @@ function openEditor(existing,prefill,opts){
     save:function(){saveService(false);},
     saveSend:function(){saveService(true);},
     sugE:function(el){$('#f_driverId').value=el.dataset.d;$('#f_vehicleId').value=el.dataset.v;updateEditor();toast('Escolhido: '+drv(el.dataset.d).name+' com o '+veh(el.dataset.v).name);},
+    srcPick:function(el){
+      var k=el.dataset.k,v=el.dataset.v;ui.editor.origin=k;
+      if(k==='direct'){$('#f_channel').value=v;$('#f_originPartnerId').value='';}else $('#f_originPartnerId').value=v;
+      $$('[data-act="srcPick"]').forEach(function(b){b.setAttribute('aria-pressed',String(b===el));});
+      var hn=$('#srcHint');if(hn)hn.remove();updateEditor();
+    },
+    srcNew:function(){var b=$('#o_newsrc');b.hidden=!b.hidden;if(!b.hidden){try{$('#f_srcName').focus();}catch(e){}}},
+    srcKind:function(el){$$('[data-act="srcKind"]').forEach(function(b){b.setAttribute('aria-pressed',String(b===el));});},
+    srcAdd:function(){
+      var n=$('#f_srcName').value.trim().replace(/\s+/g,' '),kb=$('[data-act="srcKind"][aria-pressed="true"]'),kind=kb?kb.dataset.v:'app',e=$('#e_src');
+      if(!n){e.textContent='Escreve o nome.';e.hidden=false;return;}
+      n=cap(n);
+      if(kind==='direct'){
+        var ch=S.settings.channels;var ex0=ch.filter(function(c){return norm(c)===norm(n);})[0];if(!ex0){ch.push(n);audit('Canal criado: '+n);}else n=ex0;
+        ui.editor.origin='direct';$('#f_channel').value=n;$('#f_originPartnerId').value='';
+      }else{
+        var p=live(S.partners).filter(function(x){return norm(x.name)===norm(n);})[0];
+        if(!p){p={id:'p'+uid(),name:n,kind:kind==='app'?'app':'',company:'',nif:'',phone:'',email:'',address:'',terms:30,gives:true,does:false,notes:''};S.partners.push(p);audit((kind==='app'?'App criada: ':'Parceiro criado: ')+n);}
+        else if(!p.gives)p.gives=true;
+        var sel=$('#f_originPartnerId');if(!sel.querySelector('option[value="'+p.id+'"]'))sel.insertAdjacentHTML('beforeend','<option value="'+esc(p.id)+'">'+esc(p.name)+'</option>');
+        ui.editor.origin='partner';sel.value=p.id;
+      }
+      save();
+      $('#srcPick').innerHTML=srcPickHTML(ui.editor.origin,$('#f_originPartnerId').value,$('#f_channel').value);
+      $('#o_newsrc').hidden=true;$('#f_srcName').value='';updateEditor();toast('Origem adicionada: '+n);
+    },
     oSeg:function(el){ui.editor.origin=el.dataset.v;$$('[data-act="oSeg"]').forEach(function(b){b.setAttribute('aria-pressed',String(b===el));});updateEditor();},
     eSeg:function(el){ui.editor.exec=el.dataset.v;$$('[data-act="eSeg"]').forEach(function(b){b.setAttribute('aria-pressed',String(b===el));});updateEditor();},
     addStop:function(){var box=$('#stopsBox');box.insertAdjacentHTML('beforeend',stopRow(''));var ins=$$('.stopIn',box);try{ins[ins.length-1].focus();}catch(e){}},
@@ -2496,7 +2605,7 @@ function updateEditor(){
   var E=ui.editor;if(!E||!$('#f_date'))return;
   var g=function(k){return $('#f_'+k);};
   $('#o_direct').hidden=E.origin!=='direct';$('#o_partner').hidden=E.origin!=='partner';
-  $('#o_new').hidden=g('originPartnerId').value!=='_new';
+  var lp=$('#l_pref');if(lp)lp.textContent=isApp(prt(g('originPartnerId').value))?'Referência na app':'Referência do parceiro';
   $('#e_int').hidden=E.exec!=='int';$('#e_ext').hidden=E.exec!=='ext';
   $('#e_new').hidden=g('execPartnerId').value!=='_new';
   if($('#v_ext')){$('#v_ext').hidden=E.exec!=='ext';$('#v_int').hidden=E.exec!=='int';}
@@ -2552,7 +2661,7 @@ function saveService(send){
   if(!d.date)errs.date='Indica a data.';
   if(!d.time)errs.time='Indica a hora de início.';
   if(!d.pickup)errs.pickup='Indica o local de recolha.';
-  if(d.origin==='partner'){if(!d.originPartnerId)errs.originPartnerId='Escolhe o parceiro.';else if(d.originPartnerId==='_new'&&!$('#f_newOP').value.trim())errs.newOP='Escreve o nome do parceiro.';}
+  if(d.origin==='partner'&&!d.originPartnerId)errs.originPartnerId='Escolhe a app ou o parceiro de onde vem.';
   if(d.exec==='ext'&&d.execPartnerId==='_new'&&!$('#f_newEP').value.trim())errs.newEP='Escreve o nome do parceiro.';
   if(send){
     if(d.exec==='int'){if(!d.driverId)errs.driverId='Escolhe o driver para poderes enviar.';if(!d.vehicleId)errs.vehicleId='Escolhe o veículo para poderes enviar.';}
@@ -2562,7 +2671,6 @@ function saveService(send){
   var keys=Object.keys(errs);
   if(keys.length){keys.forEach(function(k){var p=$('#e_'+k);if(p){p.textContent=errs[k];p.hidden=false;}});var first=$('#f_'+keys[0]);if(first){first.scrollIntoView({block:'center'});try{first.focus({preventScroll:true});}catch(e){}}return;}
   function newPartner(name,role){var p={id:'p'+uid(),name:name,company:'',nif:'',phone:'',email:'',address:'',terms:30,gives:role==='gives',does:role==='does',notes:''};S.partners.push(p);audit('Parceiro criado: '+name);return p.id;}
-  if(d.originPartnerId==='_new')d.originPartnerId=newPartner($('#f_newOP').value.trim(),'gives');
   if(d.execPartnerId==='_new')d.execPartnerId=newPartner($('#f_newEP').value.trim(),'does');
   var ex=E.existing,s=ex?svcById(ex.id):null,msg;
   if(!s){
@@ -2862,7 +2970,7 @@ function openPartnerEditor(pid,back){
   var body='<form novalidate style="display:grid;gap:16px">'+fld('r_name','Nome',o.name,'text','placeholder="Como lhe chamam no dia a dia"')+'<p class="err" id="e_r_name" hidden></p>'+
     fld('r_company','Empresa',o.company,'text','placeholder="Nome legal, para as faturas"')+'<div class="g2 stack">'+fld('r_nif','NIF',o.nif,'text','inputmode="numeric"')+fld('r_terms','Prazo de pagamento (dias)',o.terms,'number','min="0" step="1" inputmode="numeric"')+'</div>'+
     '<div class="g2 stack">'+fld('r_phone','Telefone',o.phone,'tel')+fld('r_email','Email',o.email,'email')+'</div>'+fld('r_addr','Morada',o.address)+
-    '<div class="f"><span class="lab">O que faz connosco</span><label class="check"><input type="checkbox" id="r_gives"'+(o.gives?' checked':'')+'> Entrega-nos serviços</label><label class="check"><input type="checkbox" id="r_does"'+(o.does?' checked':'')+'> Faz serviços para nós</label></div>'+
+    '<div class="f"><span class="lab">O que faz connosco</span><label class="check"><input type="checkbox" id="r_gives"'+(o.gives?' checked':'')+'> Entrega-nos serviços</label><label class="check"><input type="checkbox" id="r_does"'+(o.does?' checked':'')+'> Faz serviços para nós</label><label class="check"><input type="checkbox" id="r_app"'+(isApp(o)?' checked':'')+'> É uma app ou plataforma de reservas</label></div>'+
     '<div class="f"><label for="r_notes">Notas</label><textarea id="r_notes" rows="3">'+esc(o.notes||'')+'</textarea></div></form><div id="resMsg"></div>';
   var done=back||function(){closeSheet();};
   openSheet(p?'Editar parceiro':'Novo parceiro',body,'<button type="button" class="btn" data-act="save">'+(p?'Guardar':'Adicionar parceiro')+'</button>'+(p?'<button type="button" class="tbtn danger" data-act="rm">Remover parceiro</button>':'')+(back?'<button type="button" class="tbtn muted" data-act="back">Voltar</button>':''),{
@@ -2870,7 +2978,7 @@ function openPartnerEditor(pid,back){
     save:function(){
       var n=$('#r_name').value.trim();if(!n){var e=$('#e_r_name');e.textContent='Indica o nome.';e.hidden=false;return;}
       var x=p||{id:'p'+uid()};x.name=n;x.company=$('#r_company').value.trim();x.nif=$('#r_nif').value.trim();var tm=parseInt($('#r_terms').value,10);x.terms=isFinite(tm)&&tm>=0?tm:0;
-      x.phone=$('#r_phone').value.trim();x.email=$('#r_email').value.trim();x.address=$('#r_addr').value.trim();x.gives=$('#r_gives').checked;x.does=$('#r_does').checked;x.notes=$('#r_notes').value.trim();
+      x.phone=$('#r_phone').value.trim();x.email=$('#r_email').value.trim();x.address=$('#r_addr').value.trim();x.gives=$('#r_gives').checked;x.does=$('#r_does').checked;x.notes=$('#r_notes').value.trim();x.kind=$('#r_app').checked?'app':'';
       if(!p){S.partners.push(x);audit('Parceiro criado: '+n);}else audit('Parceiro alterado: '+n);
       save();toast(p?'Alterações guardadas':'Parceiro adicionado');done();
     },
@@ -3017,7 +3125,7 @@ function shareText(s,mode){
   L.push('Date: '+enDate(s.date));
   L.push('Pick-up time: '+(s.time||'—'));
   if(s.end)L.push('Estimated end: '+s.end);
-  L.push('Service: '+(EVENTS_EN[s.event]||s.event||'Transfer'));
+  L.push('Service: '+(typeEN(s.event)));
   L.push('');
   L.push('Passenger: '+(s.name||'—')+(blank(s.pax)?'':' ('+s.pax+' pax)'));
   if(s.phone)L.push('Phone: '+s.phone);
@@ -3071,8 +3179,8 @@ function drawSheet(s,mode){
   (s.stops||[]).forEach(function(st,i){lab(s.stops.length>1?'Stop '+(i+1):'Stop',64,y);y=val(st,64,y+46,W-128,34,500)+50;});
   lab('Drop-off',64,y);y=val(s.dropoff||'—',64,y+46,W-128,38,600)+56;
   if(s.flight){lab('Flight number',64,y);x.fillStyle=INK;x.font='600 38px '+BODY;x.fillText(s.flight,64,y+48);y+=112;}
-  if(forP){y=section('Service',y);y=pair('Service',EVENTS_EN[s.event]||s.event||'Transfer','Vehicle type',s.vtype||'—',y);}
-  else{y=section('Vehicle and driver',y);y=pair('Service',EVENTS_EN[s.event]||s.event||'Transfer','Vehicle',v?v.name+(v.plate?', '+v.plate:''):'—',y);y=pair('Driver',d?d.name:'—','Vehicle type',v?v.cat:(s.vtype||'—'),y);}
+  if(forP){y=section('Service',y);y=pair('Service',typeEN(s.event),'Vehicle type',s.vtype||'—',y);}
+  else{y=section('Vehicle and driver',y);y=pair('Service',typeEN(s.event),'Vehicle',v?v.name+(v.plate?', '+v.plate:''):'—',y);y=pair('Driver',d?d.name:'—','Vehicle type',v?v.cat:(s.vtype||'—'),y);}
   if(s.notes||s.req||s.booster){
     y=section('Additional information',y);
     if(s.notes||s.booster){lab('Notes',64,y);y=val([s.booster?'Bring a child seat.':'',s.notes].filter(Boolean).join(' '),64,y+46,W-128)+56;}
