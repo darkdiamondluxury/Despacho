@@ -192,6 +192,7 @@ body.has-fab .app{padding-block-end:196px}
 .sheet-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px 8px}
 .sheet-head h2{margin:0;font:600 18px/1.25 var(--f-body);min-width:0}
 .sheet-body{flex:1 1 auto;min-height:0;overflow:auto;padding:4px 16px 28px;overscroll-behavior:contain}
+#newFoot{display:grid;gap:8px}
 .sheet-foot{display:grid;gap:8px;padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);background:var(--bg)}
 @media (min-width:700px){.sheet-wrap{align-items:center;padding:28px}.sheet{height:auto;max-height:100%;border-radius:20px}}
 
@@ -1921,7 +1922,7 @@ var sheetAct={},sheetOnClose=null,lastFocus=null;
 function openSheet(title,body,foot,acts,onClose){
   $('#sheetTitle').textContent=title;
   $('#sheetBody').innerHTML=body;
-  var ft=$('#sheetFoot');ft.innerHTML=foot||'';ft.hidden=!foot;
+  var ft=$('#sheetFoot');ft.innerHTML=foot||'';ft.hidden=!foot;ft.dataset.h='';
   sheetAct=Object.assign({copy:doCopy},acts||{});
   sheetOnClose=onClose||null;
   ui.editor=null;
@@ -2557,7 +2558,7 @@ function openEditor(existing,prefill,opts){
         '<button type="button" class="btn alt sm" data-act="srcAdd">Adicionar e escolher</button><p class="err" id="e_src" hidden></p></div>'+
       '<div id="o_direct" class="g2 stack">'+F('billName','Faturar a',I('billName','text','placeholder="Em branco, o nome do cliente"'))+F('billNif','NIF, se pedir fatura',I('billNif','text','inputmode="numeric"'))+'</div>'+
       '<div id="o_partner" style="display:grid;gap:14px">'+F('pref','<span id="l_pref">Referência do parceiro</span>',I('pref','text','autocomplete="off" placeholder="O número da reserva na app ou no email deles"'))+'</div></fieldset>'+
-    '<fieldset id="execSet"><legend>Quem faz</legend><div class="seg in" role="group" aria-label="Quem faz"><button type="button" data-act="eSeg" data-v="int" aria-pressed="'+(ui.editorPending.exec==='int')+'">A nossa equipa</button><button type="button" data-act="eSeg" data-v="ext" aria-pressed="'+(ui.editorPending.exec==='ext')+'">Um parceiro</button></div>'+
+    '<fieldset id="execSet"><legend>Quem faz <span class="muted" style="font-weight:400;font-size:15px">, opcional</span></legend><div class="seg in" role="group" aria-label="Quem faz"><button type="button" data-act="eSeg" data-v="int" aria-pressed="'+(ui.editorPending.exec==='int')+'">A nossa equipa</button><button type="button" data-act="eSeg" data-v="ext" aria-pressed="'+(ui.editorPending.exec==='ext')+'">Um parceiro</button></div>'+
       '<div id="e_int" style="display:grid;gap:14px"><div id="sugBox"></div>'+F('driverId','Driver',OPTS('driverId',drvO,'Escolher driver'))+'<div id="w_driver"></div>'+F('vehicleId','Veículo',OPTS('vehicleId',vehO,'Escolher veículo'))+'<div id="w_vehicle"></div></div>'+
       '<div id="e_ext" style="display:grid;gap:14px">'+F('execPartnerId','Parceiro que faz',OPTS('execPartnerId',doO,'Escolher parceiro','Novo parceiro…'))+'<div id="e_new" hidden>'+F('newEP','Nome do novo parceiro','<input id="f_newEP" type="text">')+'</div>'+
         '<p class="hint">Continua a ser um serviço só: a venda fica do lado de quem nos entrega e o custo do lado de quem faz.</p></div></fieldset>'+
@@ -2579,11 +2580,12 @@ function openEditor(existing,prefill,opts){
   var foot;
   if(existing&&ACTIVE.indexOf(existing.status)>-1)foot='<p class="foot-hint">'+(isExt(existing)?'Se mudares de parceiro, o serviço volta a por entregar.':'O driver vê o serviço marcado como alterado. Se trocares de driver, volta a por enviar.')+'</p><button type="button" class="btn" data-act="save">Guardar alterações</button>';
   else if(existing&&(DONE.indexOf(existing.status)>-1||existing.status==='cancelado'))foot='<button type="button" class="btn" data-act="save">Guardar alterações</button>';
-  else foot='<div class="row2"><button type="button" class="btn alt" data-act="save">Guardar</button><button type="button" class="btn" data-act="saveSend">Guardar e enviar</button></div>';
+  else foot='<div id="newFoot"></div>';
   var title=opts.title||(existing?'Editar '+(existing.ref||'serviço'):'Novo serviço');
   var pend=ui.editorPending;ui.editorPending=null;
   openSheet(title,body,foot,{
     save:function(){saveService(false);},
+    saveNext:function(){saveService(false,true);},
     saveSend:function(){saveService(true);},
     sugE:function(el){$('#f_driverId').value=el.dataset.d;$('#f_vehicleId').value=el.dataset.v;updateEditor();toast('Escolhido: '+drv(el.dataset.d).name+' com o '+veh(el.dataset.v).name);},
     srcPick:function(el){
@@ -2660,6 +2662,14 @@ function updateEditor(){
     var vc=$('#valCnt');if(vc)vc.textContent=any?'margem '+eur0(f.margin):'opcional';
   }
   var sb=$('#sheetFoot [data-act="saveSend"]');if(sb)sb.textContent=E.exec==='ext'?'Guardar e entregar':'Guardar e enviar';
+  /* New or not yet sent: saving never needs a driver. Sending appears once someone is chosen. */
+  var nf=$('#newFoot');
+  if(nf){
+    var epv=g('execPartnerId').value,ready=E.exec==='int'?!!(dId&&vId):!!epv;
+    var fh=ready?'<div class="row2"><button type="button" class="btn alt" data-act="save">Só guardar</button><button type="button" class="btn" data-act="saveSend">'+esc(E.exec==='ext'?'Guardar e entregar':'Guardar e enviar a '+drv(dId).name)+'</button></div>':
+      (E.existing?'<button type="button" class="btn" data-act="save">Guardar alterações</button>':'<div class="row2"><button type="button" class="btn alt" data-act="saveNext">Guardar e novo</button><button type="button" class="btn" data-act="save">Guardar</button></div>')+'<p class="foot-hint">'+(E.exec==='int'&&(dId||vId)?'Falta '+(dId?'o veículo':'o driver')+' para poder enviar. Podes guardar já e alocar depois.':'Sem driver, fica em Por alocar. Alocas quando quiseres.')+'</p>';
+    if(nf.dataset.h!==fh){nf.innerHTML=fh;nf.dataset.h=fh;}
+  }
 }
 function collect(){
   var E=ui.editor,cm=canMoney();
@@ -2677,7 +2687,7 @@ function collect(){
   return d;
 }
 function moneySig(s){return [s.price,s.priceVat,s.vatRate,s.cost,s.costVat,s.costRate,s.costDed,s.pay].join('|');}
-function saveService(send){
+function saveService(send,next){
   var E=ui.editor,d=collect(),errs={};
   if(!d.date)errs.date='Indica a data.';
   if(!d.time)errs.time='Indica a hora de início.';
@@ -2728,6 +2738,7 @@ function saveService(send){
   ui.editor=null;
   if(!ex){var t=today();ui.filter=s.status==='pendente'?'acao':s.date===t?'hoje':s.date===addDays(t,1)?'amanha':'depois';}
   render();
+  if(next&&!ex){toast(msg+'. Podes registar o próximo.');openChooser();return;}
   if(deliverAfter)openDeliver(s,function(){openDetail(id);});
   else{openDetail(id);toast(msg);}
 }
