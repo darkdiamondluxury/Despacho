@@ -590,7 +590,7 @@ var ACTIVE=['enviado','aceite','a_caminho','a_bordo','entregue'];
 var DONE=['concluido','no_show'];
 function defaultSettings(){
   return {types:DEF_TYPES.map(function(t){return {name:t[0],dur:t[1]};}),defaultDur:60,buffer:15,wait:60,
-    payByCat:{'Carro':10,'Carro Executive':12,'Van':12,'Van VIP':15},payExample:true,
+    payByCat:{'Carro':10,'Carro Executive':12,'Van':12,'Van VIP':15},payExample:true,payRules:[],
     company:{name:'',nif:'',address:'',phone:'',email:''},vat:6,clientTerms:0,theme:'auto'};
 }
 
@@ -766,13 +766,14 @@ function seed(){
     {id:uid(),driverId:'d2',date:t2,from:'',to:'',note:'Folga'}
   ];
   var notices=[{id:'n1',at:at(t,'08:00'),by:'m1',to:'all',text:'Amanhã há um casamento em Évora. Fato escuro e gravata, por favor.'}];
-  return {v:4,role:'m1',masters:masters,partners:partners,vehicles:vehicles,drivers:drivers,services:services,settings:settings,unavail:unavail,priv:priv,genExp:genExp,driverPays:driverPays,notices:notices,noticeSeen:{},audit:audit};
+  settings.payRules=[{id:uid(),driverId:'d3',type:'Chegada aeroporto',cat:'',origin:'',amount:7,from:t}];
+  return {v:5,role:'m1',masters:masters,partners:partners,vehicles:vehicles,drivers:drivers,services:services,settings:settings,unavail:unavail,priv:priv,genExp:genExp,driverPays:driverPays,notices:notices,noticeSeen:{},audit:audit};
 }
 
 /* ---------- state ---------- */
 var S=null;
 try{var raw=localStorage.getItem(LS);if(raw)S=JSON.parse(raw);}catch(e){S=null;}
-if(!S||S.v!==4||!Array.isArray(S.services))S=seed();
+if(!S||S.v!==5||!Array.isArray(S.services))S=seed();
 (function fill(){
   var d=defaultSettings();S.settings=S.settings||d;
   Object.keys(d).forEach(function(k){if(S.settings[k]==null)S.settings[k]=d[k];});
@@ -815,7 +816,43 @@ function statusOf(s){
   var o=STATUS[s.status]||STATUS.pendente;return {key:s.status,label:o.label,c:o.c};
 }
 function isVan(s){var v=veh(s.vehicleId);return v?/^Van/.test(v.cat):/^Van/.test(s.vtype||'');}
-function payOf(s){if(isExt(s))return null;if(!blank(s.pay))return Number(s.pay);var v=veh(s.vehicleId),p=v&&S.settings.payByCat[v.cat];return blank(p)?null:Number(p);}
+/* Driver pay: a value written in the service wins; then the most specific matching rule; then the vehicle category value.
+   Specificity: driver > service type > where it comes from > vehicle category. Ties go to the rule that started later. */
+function payRules(){return S.settings.payRules||(S.settings.payRules=[]);}
+function ruleMatch(r,s){
+  if(blank(r.amount))return false;
+  if(r.driverId&&r.driverId!==s.driverId)return false;
+  if(r.type&&r.type!==s.event)return false;
+  if(r.cat){var v=veh(s.vehicleId);if(!v||v.cat!==r.cat)return false;}
+  if(r.origin){if(r.origin==='direct'){if(s.origin!=='direct')return false;}else if(!(s.origin==='partner'&&s.originPartnerId===r.origin))return false;}
+  if(r.from&&(!s.date||s.date<r.from))return false;
+  return true;
+}
+function ruleScore(r){return (r.driverId?8:0)+(r.type?4:0)+(r.origin?2:0)+(r.cat?1:0);}
+function payInfo(s){
+  if(isExt(s))return {v:null,src:''};
+  if(!blank(s.pay))return {v:Number(s.pay),src:'service'};
+  var best=null;
+  payRules().forEach(function(r){if(!ruleMatch(r,s))return;var a=ruleScore(r),b=best?ruleScore(best):-1;if(a>b||(a===b&&(r.from||'')>(best.from||'')))best=r;});
+  if(best)return {v:Number(best.amount),src:'rule',rule:best};
+  var v=veh(s.vehicleId),p=v&&S.settings.payByCat[v.cat];
+  return blank(p)?{v:null,src:''}:{v:Number(p),src:'cat',cat:v.cat};
+}
+function payOf(s){return payInfo(s).v;}
+function ruleWho(r){
+  var parts=[r.driverId?(drv(r.driverId)||{name:'Driver removido'}).name:'Todos os drivers'];
+  if(r.type)parts.push(r.type.toLowerCase());
+  if(r.origin)parts.push(r.origin==='direct'?'clientes diretos':'serviços de '+pName(r.origin));
+  if(r.cat)parts.push(r.cat);
+  return parts.join(', ');
+}
+function ruleWhen(r){return r.from?'A partir de '+dmy(r.from):'Sempre';}
+function paySrcText(pi){
+  if(pi.src==='service')return 'Valor escrito neste serviço';
+  if(pi.src==='rule')return 'Valor especial: '+ruleWho(pi.rule);
+  if(pi.src==='cat')return 'Valor de '+pi.cat;
+  return 'Por definir';
+}
 function expAll(s){return sumAmt(s.expenses);}
 function expDriver(s){return (s.expenses||[]).reduce(function(a,x){return x.paidBy==='driver'?a+Number(x.amount||0):a;},0);}
 function expCost(s){return (s.expenses||[]).reduce(function(a,x){return isExt(s)&&x.inPartner?a:a+Number(x.amount||0);},0);}
@@ -1697,7 +1734,7 @@ function openDriverAccount(dId,ym,back){
     '<div class="brow total"><span>Ganho em '+esc(monthName(ym))+'</span><span class="v">'+eur(E.total)+'</span></div>'+
     '<div class="brow"><span>Pago em '+esc(monthName(ym))+'<small>'+(paidM.length?plural(paidM.length,'pagamento','pagamentos'):'Nenhum pagamento')+'</small></span><span class="v">'+eur(sumAmt(paidM))+'</span></div>'+
     '</div></div>'+
-    (E.noPay?'<p class="fine">'+plural(E.noPay,'serviço não tem','serviços não têm')+' valor. Define-o no serviço ou por categoria de veículo em Valores, IVA e prazos.</p>':'')+
+    (E.noPay?'<p class="fine">'+plural(E.noPay,'serviço não tem','serviços não têm')+' valor. Define-o no serviço ou em Valores, IVA e prazos.</p>':'')+
     '<div class="blk">'+(E.list.length?more('Ver os serviços',E.list.length,E.list.map(function(s){var p=payOf(s),e=expDriver(s);return '<button type="button" class="mrow" data-act="svcOpen" data-id="'+esc(s.id)+'"><span class="d">'+esc(dmy(s.date))+'<br>'+esc(s.time)+'</span><span class="m"><b>'+esc(shortPlace(s.pickup))+'</b><span>para '+esc(shortPlace(s.dropoff))+'</span></span><span class="a">'+(p==null?'—':eur(p))+'<small'+(s.status==='no_show'?' class="bad"':'')+'>'+(s.status==='no_show'?'Não apareceu':(e?'+ '+eur(e)+' de despesas':'Concluído'))+'</small></span></button>';}).join(''),true):'')+
     (pays.length?more('Pagamentos registados',pays.length,pays.slice(0,24).map(function(p){return '<div class="mrow" style="cursor:default"><span class="d">'+esc(dmy(p.date))+'</span><span class="m"><b>'+esc(p.method)+'</b><span>'+esc(p.note||'')+'</span></span><span class="a">'+eur(p.amount)+'</span></div>';}).join(''),true):'')+'</div>';
   openSheet(d.name+', contas',body,'<div class="row2"><button type="button" class="btn alt" data-act="dCsv">Exportar</button><button type="button" class="btn" data-act="dPay">Registar pagamento</button></div>',{
@@ -1948,8 +1985,14 @@ function openSettings(k){
     body='<div style="display:grid;gap:14px"><div class="f"><label for="mv_vat">Taxa de IVA por omissão</label><select id="mv_vat" data-set="vat">'+VAT_RATES.map(function(r){return '<option value="'+r+'"'+(r===Number(st.vat)?' selected':'')+'>'+r+' %</option>';}).join('')+'</select></div>'+
       '<p class="hint">O transporte de passageiros em viaturas ligeiras tem a taxa reduzida de 6 % (verba 2.14 da Lista I do Código do IVA), segundo uma <a href="https://info.portaldasfinancas.gov.pt/pt/informacao_fiscal/informacoes_vinculativas/despesa/civa/Documents/INFORMACAO_13838.pdf" target="_blank" rel="noopener">informação vinculativa da AT</a>. Confirma com o contabilista. Em cada serviço podes escolher outra taxa.</p>'+
       numField('mv_terms','Prazo de pagamento dos clientes diretos (dias)','cterms',st.clientTerms,1)+'<p class="hint">Os parceiros têm o seu prazo na ficha de cada um.</p></div>'+
-      '<h3 style="margin:26px 0 6px;font:600 17px/1.3 var(--f-body)">A pagar ao driver por serviço</h3><p class="hint" style="margin-bottom:14px">Conforme o veículo. Num serviço especial podes pôr outro valor no próprio serviço.'+(st.payExample?' Os valores atuais são de exemplo.':'')+'</p><div class="g2">'+
-      VTYPES.map(function(c,i){return numField('pc_'+i,c+' (€)','pay:'+c,st.payByCat[c],'0.5','decimal');}).join('')+'</div>';
+      '<h3 style="margin:26px 0 6px;font:600 17px/1.3 var(--f-body)">A pagar ao driver por serviço</h3><p class="hint" style="margin-bottom:14px">O valor base, conforme o veículo. Vale para todos os drivers, exceto quando há um valor especial.'+(st.payExample?' Os valores atuais são de exemplo.':'')+'</p><div class="g2">'+
+      VTYPES.map(function(c,i){return numField('pc_'+i,c+' (€)','pay:'+c,st.payByCat[c],'0.5','decimal');}).join('')+'</div>'+
+      '<h3 style="margin:28px 0 6px;font:600 17px/1.3 var(--f-body)">Valores especiais</h3><p class="hint" style="margin-bottom:12px">Para pagar valores diferentes a drivers diferentes, ou conforme o tipo de serviço, de onde vem ou o veículo.</p>'+
+      rulesList(payRules())+
+      '<button type="button" class="btn alt sm" data-act="rNew" style="margin-top:12px">Adicionar valor especial</button>'+
+      '<details class="more" style="margin-top:18px"><summary><span>Como a app escolhe o valor</span></summary><div class="more-b"><p class="hint" style="margin:0 0 8px">1. Um valor escrito no próprio serviço ganha sempre.</p><p class="hint" style="margin:0 0 8px">2. Senão, vale o valor especial mais específico. O driver conta mais do que o tipo de serviço, o tipo mais do que a origem, e a origem mais do que o veículo.</p><p class="hint" style="margin:0 0 8px">3. Se não houver nenhum, vale o valor base do veículo.</p><p class="hint" style="margin:0">Para mudar um valor sem mexer nos meses já pagos, cria um novo valor especial com a data a partir da qual conta.</p></div></details>';
+    acts.rNew=function(){openRuleForm(null,null,reopen);};
+    acts.rEdit=function(el){openRuleForm(el.dataset.id,null,reopen);};
   }else if(k==='co'){
     title='Dados da empresa';
     body='<p class="hint" style="margin-bottom:18px">O nome aparece no topo da app e na service sheet. O NIF aparece quando o driver regista uma despesa, para pedir a fatura em nome da empresa.</p><div style="display:grid;gap:14px">'+
@@ -1983,6 +2026,37 @@ function openSettings(k){
   }
   acts._change=applySetting;acts.done=function(){closeSheet();toast('Guardado');};
   openSheet(title,'<form novalidate>'+body+'</form>',foot,acts,function(){render();});
+}
+function rulesList(list){
+  if(!list.length)return '<p class="hint">Ainda sem valores especiais.</p>';
+  var sorted=list.slice().sort(function(a,b){return ruleWho(a).localeCompare(ruleWho(b))||(a.from||'').localeCompare(b.from||'');});
+  return '<div class="group">'+sorted.map(function(r){return '<button type="button" class="nrow" data-act="rEdit" data-id="'+esc(r.id)+'"><span>'+esc(ruleWho(r))+'<span class="s">'+esc(ruleWhen(r))+'</span></span><span class="v strong">'+eur(r.amount)+'</span>'+I_CHEV+'</button>';}).join('')+'</div>';
+}
+function openRuleForm(id,pre,back){
+  var r=id?payRules().filter(function(x){return x.id===id;})[0]:null,o=r||Object.assign({driverId:'',type:'',cat:'',origin:'',amount:'',from:''},pre||{});
+  var D=S.drivers.filter(function(d){return !d.removed||d.id===o.driverId;}),P=live(S.partners).filter(function(p){return p.gives||p.id===o.origin;});
+  var body='<form novalidate style="display:grid;gap:16px"><p class="hint">Escolhe a quem e a que serviços se aplica. O que deixares em Todos vale para tudo.</p>'+
+    selHTML('ru_drv','Driver',[['','Todos os drivers']].concat(D.map(function(d){return [d.id,d.name];})),o.driverId)+
+    selHTML('ru_type','Tipo de serviço',[['','Todos os tipos']].concat(S.settings.types.map(function(t){return [t.name,t.name];})),o.type)+
+    selHTML('ru_org','De onde vem',[['','Todos'],['direct','Clientes diretos']].concat(P.map(function(p){return [p.id,p.name];})),o.origin)+
+    selHTML('ru_cat','Veículo',[['','Todos os veículos']].concat(VTYPES.map(function(c){return [c,c];})),o.cat)+
+    '<div class="g2"><div class="f"><label for="ru_amt">Valor por serviço (€)</label><input id="ru_amt" type="number" min="0" step="0.5" inputmode="decimal" value="'+esc(o.amount)+'"></div><div class="f"><label for="ru_from">A partir de</label><input id="ru_from" type="date" value="'+esc(o.from||'')+'"></div></div>'+
+    '<p class="hint">Sem data, conta também para os serviços antigos.</p><p class="err" id="e_ru" hidden></p></form>';
+  openSheet(r?'Valor especial':'Novo valor especial',body,'<button type="button" class="btn" data-act="ruSave">Guardar</button>'+(r?'<button type="button" class="tbtn danger" data-act="ruRm">Remover</button>':'')+(back?'<button type="button" class="tbtn muted" data-act="back">Voltar</button>':''),{
+    back:back,
+    ruSave:function(){
+      var a=parseFloat(String($('#ru_amt').value).replace(',','.')),e=$('#e_ru');
+      if(!isFinite(a)||a<0){e.textContent='Indica o valor.';e.hidden=false;return;}
+      var x=r||{id:uid()};x.driverId=$('#ru_drv').value;x.type=$('#ru_type').value;x.origin=$('#ru_org').value;x.cat=$('#ru_cat').value;x.amount=r2(a);x.from=$('#ru_from').value;
+      var dup=payRules().filter(function(y){return y!==x&&y.driverId===x.driverId&&y.type===x.type&&y.origin===x.origin&&y.cat===x.cat&&(y.from||'')===(x.from||'');})[0];
+      if(dup){e.textContent='Já existe um valor para esta combinação e esta data: '+eur(dup.amount)+'. Altera esse ou escolhe outra data.';e.hidden=false;return;}
+      if(!r)payRules().push(x);
+      S.settings.payExample=false;
+      audit((r?'Valor especial alterado: ':'Valor especial criado: ')+ruleWho(x)+', '+eur(x.amount)+(x.from?', a partir de '+dmy(x.from):''),true);
+      save();toast('Valor guardado');if(back)back();else closeSheet();
+    },
+    ruRm:function(){S.settings.payRules=payRules().filter(function(y){return y.id!==id;});audit('Valor especial removido: '+ruleWho(r)+', '+eur(r.amount),true);save();toast('Valor removido');if(back)back();else closeSheet();}
+  },function(){render();});
 }
 function openAudit(){
   var cm=canMoney(),items=[];
@@ -2071,7 +2145,7 @@ function moneyHTML(s){
   var f=fin(s),ext=isExt(s),canc=s.status==='cancelado',rows='';
   rows+='<div class="brow"><span>'+(canc?'Taxa de cancelamento':'Venda')+'<small>'+(blank(canc?s.cancelFee:s.price)?(canc?'Sem taxa: não conta como receita':'Por definir'):'Sem IVA. Com IVA, '+eur(f.saleGross))+'</small></span><span class="v">'+eur(f.saleNet)+'</span></div>';
   if(ext)rows+='<div class="brow"><span>Custo do parceiro<small>'+(blank(canc?s.cancelCost:s.cost)?(canc?'Sem taxa do parceiro':'Por definir'):'Sem IVA'+(s.costDed===false?', IVA não dedutível':'')+'. Com IVA, '+eur(f.costGross))+'</small></span><span class="v neg">'+neg(f.costM)+'</span></div>';
-  else if(!canc){var p=payOf(s);rows+='<div class="brow"><span>Driver<small>'+(p==null?'Por definir':blank(s.pay)?'Valor da categoria do veículo':'Valor deste serviço')+'</small></span><span class="v neg">'+neg(f.pay)+'</span></div>';}
+  else if(!canc){var pi=payInfo(s);rows+='<div class="brow"><span>Driver<small>'+esc(paySrcText(pi))+'</small></span><span class="v neg">'+neg(f.pay)+'</span></div>';}
   if((s.expenses||[]).length)rows+='<div class="brow"><span>Despesas<small>'+plural(s.expenses.length,'registada','registadas')+(ext&&s.expenses.some(function(x){return x.inPartner;})?', sem as incluídas no preço do parceiro':'')+'</small></span><span class="v neg">'+neg(f.exp)+'</span></div>';
   rows+='<div class="brow total"><span>Margem'+(f.prov?'<small class="attn">Provisória: falta '+esc(f.missing.join(' e '))+'</small>':f.pct!=null?'<small>'+pctTxt(f.pct)+' da venda</small>':'')+'</span><span class="v">'+eur(f.margin)+'</span></div>';
   var st=[];
@@ -2338,9 +2412,9 @@ function updateEditor(){
       var ex=E.existing;if(ex&&ex.status==='recusado'&&(ex.declinedBy||ex.driverId)===dId)wd.push(dd.name+' recusou este serviço.');}
   }
   setWarn('w_vehicle',wv);setWarn('w_driver',wd);
-  var hp=$('#h_pay');if(hp){var vv2=veh(vId),pc=vv2&&S.settings.payByCat[vv2.cat];hp.textContent=(vv2&&!blank(pc))?'Em branco, o driver recebe o valor de '+vv2.cat+': '+eur(pc)+'.':'Em branco, usa o valor por categoria de veículo.';}
+  var hp=$('#h_pay');if(hp){var pi2=payInfo({exec:'int',driverId:dId,vehicleId:vId,event:ev,date:tmp.date,origin:E.origin,originPartnerId:g('originPartnerId').value});hp.textContent=pi2.v==null?'Em branco, usa os valores definidos em Valores, IVA e prazos. Ainda não há valor para esta combinação.':'Em branco, o driver recebe '+eur(pi2.v)+' ('+paySrcText(pi2).charAt(0).toLowerCase()+paySrcText(pi2).slice(1)+').';}
   if($('#mprev')){
-    var ex2=E.existing,tm={exec:E.exec,status:'pendente',price:g('price').value,priceVat:g('priceVat').value,vatRate:g('vatRate').value,cost:g('cost').value,costVat:g('costVat').value,costRate:g('costRate').value,costDed:g('costDed').checked,pay:g('pay').value,vehicleId:vId,expenses:ex2?ex2.expenses:[],receipts:[],payouts:[],date:tmp.date,origin:E.origin};
+    var ex2=E.existing,tm={exec:E.exec,status:'pendente',price:g('price').value,priceVat:g('priceVat').value,vatRate:g('vatRate').value,cost:g('cost').value,costVat:g('costVat').value,costRate:g('costRate').value,costDed:g('costDed').checked,pay:g('pay').value,vehicleId:vId,driverId:dId,event:ev,originPartnerId:g('originPartnerId').value,expenses:ex2?ex2.expenses:[],receipts:[],payouts:[],date:tmp.date,origin:E.origin};
     var f=fin(tm),any=!blank(tm.price)||!blank(tm.cost)||!blank(tm.pay);
     $('#mprev').innerHTML='<span>'+(f.prov?'Margem provisória<br><span class="prov">Falta '+esc(f.missing.join(' e '))+'</span>':'Margem prevista'+(f.pct!=null?', '+pctTxt(f.pct):''))+'</span><b>'+eur(f.margin)+'</b>';
     var vc=$('#valCnt');if(vc)vc.textContent=any?'margem '+eur0(f.margin):'opcional';
@@ -2712,6 +2786,7 @@ function openDriverEditor(id,back){
     '<div class="f"><label for="r_tags">Especialidades</label><input id="r_tags" type="text" value="'+esc(r?r.tags.join(', '):'')+'" placeholder="Por exemplo, VIP, inglês, vans"><p class="hint">Separadas por vírgulas.</p></div></form>'+
     docsBlock(r,DOC_D)+
     (r?'<h3 style="margin:26px 0 8px;font:600 17px/1.3 var(--f-body)">Folgas</h3>'+(fol.length?'<div class="group">'+fol.join('')+'</div>':'<p class="hint">Sem folgas marcadas.</p>')+'<button type="button" class="tbtn" data-act="addFolga" style="padding:8px 0 0">Marcar folga</button>':'')+
+    (r&&canMoney()?'<h3 style="margin:26px 0 6px;font:600 17px/1.3 var(--f-body)">Valores de '+esc(r.name)+'</h3>'+(function(){var mine=payRules().filter(function(x){return x.driverId===r.id;});return mine.length?rulesList(mine):'<p class="hint">Recebe os valores base do veículo.</p>';})()+'<button type="button" class="tbtn" data-act="rNew" style="padding:8px 0 0">Adicionar valor para '+esc(r.name)+'</button>':'')+
     (r&&canMoney()?'<div class="sec"><button type="button" class="btn alt" data-act="acc">Ver contas de '+esc(r.name)+'</button></div>':'')+'<div id="resMsg"></div>';
   openSheet(r?'Editar driver':'Novo driver',body,'<button type="button" class="btn" data-act="save">'+(r?'Guardar':'Adicionar driver')+'</button>'+(r?'<button type="button" class="tbtn danger" data-act="rm">Remover driver</button>':'')+(back?'<button type="button" class="tbtn muted" data-act="back">Voltar</button>':''),{
     back:back,
@@ -2720,6 +2795,8 @@ function openDriverEditor(id,back){
     addFolga:function(){openFolgaForm(r.id,self);},
     unRm:function(el){S.unavail=S.unavail.filter(function(u){return u.id!==el.dataset.id;});save();self();toast('Folga removida');},
     acc:function(){openDriverAccount(r.id,null,self);},
+    rNew:function(){openRuleForm(null,{driverId:r.id},self);},
+    rEdit:function(el){openRuleForm(el.dataset.id,null,self);},
     save:function(){
       var n=$('#r_name').value.trim();if(!n){var e=$('#e_r_name');e.textContent='Indica o nome.';e.hidden=false;return;}
       var o=r||{id:'d'+uid(),on:true};o.name=n;o.phone=$('#r_phone').value.trim();o.tags=$('#r_tags').value.split(',').map(function(x){return x.trim();}).filter(Boolean);o.docs=readDocs();
