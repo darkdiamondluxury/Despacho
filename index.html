@@ -255,6 +255,13 @@ dl{margin:0}
 .alloc{display:grid;gap:12px;margin-bottom:16px;padding:16px;border-radius:16px;background:var(--surface);box-shadow:inset 0 0 0 1.5px var(--accent)}
 .alloc h3{margin:0;font:600 17px/1.3 var(--f-body)}
 .alloc select,.alloc input{background:var(--bg)}
+.sug{display:grid;gap:3px;padding:14px;border-radius:14px;background:var(--accent-soft)}
+.sug .k{color:var(--accent);font-size:13px;font-weight:600}
+.sug b{font-size:17px;font-weight:600}
+.sug .s{color:var(--muted);font-size:14px}
+.sug .btn{margin-top:10px}
+.sug.none{background:color-mix(in srgb,var(--attn) 13%,transparent)}
+.sug.none .k{color:var(--attn)}
 .tl{list-style:none;margin:0;padding:0}
 .tl li{display:grid;grid-template-columns:76px minmax(0,1fr);gap:12px;padding:9px 0;border-top:1px solid var(--line);font-size:15px}
 .tl li:first-child{border-top:0}
@@ -607,14 +614,14 @@ function seed(){
   ];
   var vehicles=[
     {id:'v1',name:'Mercedes Classe V',plate:'AX-21-VD',cat:'Van VIP',seats:7,bags:7,km:84200,on:true,blocks:[],docs:[{id:uid(),type:'Seguro',expiry:'2027-03-31'},{id:uid(),type:'Inspeção',expiry:addDays(t,12)},{id:uid(),type:'IUC',expiry:'2027-06-30'}]},
-    {id:'v2',name:'Van 2',plate:'BR-58-LC',cat:'Van',seats:8,bags:8,km:151900,on:true,blocks:[],docs:[{id:uid(),type:'Seguro',expiry:'2027-01-15'},{id:uid(),type:'Inspeção',expiry:'2027-04-20'}]},
+    {id:'v2',name:'Van 2',types:DEF_TYPES.map(function(x){return x[0];}).filter(function(x){return x!=='Casamento';}),plate:'BR-58-LC',cat:'Van',seats:8,bags:8,km:151900,on:true,blocks:[],docs:[{id:uid(),type:'Seguro',expiry:'2027-01-15'},{id:uid(),type:'Inspeção',expiry:'2027-04-20'}]},
     {id:'v3',name:'Van 3',plate:'CT-07-NE',cat:'Van',seats:8,bags:8,km:98450,on:true,blocks:[{id:uid(),from:addDays(t,3),to:addDays(t,4),reason:'Revisão dos 100 000 km'}],docs:[{id:uid(),type:'Seguro',expiry:'2026-12-01'},{id:uid(),type:'Inspeção',expiry:'2027-05-02'}]},
     {id:'v4',name:'Mercedes E220',plate:'AQ-90-HS',cat:'Carro Executive',seats:3,bags:4,km:61300,on:true,blocks:[],docs:[{id:uid(),type:'Seguro',expiry:addDays(t,5)},{id:uid(),type:'Inspeção',expiry:'2027-09-10'}]}
   ];
   var drivers=[
-    {id:'d1',name:'Fábio',phone:'',tags:['VIP','Inglês'],on:true,docs:[{id:uid(),type:'Carta de condução',expiry:'2031-05-10'},{id:uid(),type:'Certificado de motorista',expiry:addDays(t,20)}]},
-    {id:'d2',name:'Rui',phone:'',tags:['Tours','Inglês'],on:true,docs:[{id:uid(),type:'Carta de condução',expiry:'2029-02-01'},{id:uid(),type:'Certificado de motorista',expiry:'2027-08-15'}]},
-    {id:'d3',name:'Tiago',phone:'',tags:['Vans','Madrugadas'],on:true,docs:[{id:uid(),type:'Carta de condução',expiry:'2030-11-20'},{id:uid(),type:'Certificado de motorista',expiry:addDays(t,-3)}]}
+    {id:'d1',name:'Fábio',phone:'',tags:['VIP','Inglês'],on:true,home:'v1',docs:[{id:uid(),type:'Carta de condução',expiry:'2031-05-10'},{id:uid(),type:'Certificado de motorista',expiry:addDays(t,20)}]},
+    {id:'d2',name:'Rui',phone:'',tags:['Tours','Inglês'],on:true,home:'v4',vehicles:['v2','v3','v4'],docs:[{id:uid(),type:'Carta de condução',expiry:'2029-02-01'},{id:uid(),type:'Certificado de motorista',expiry:'2027-08-15'}]},
+    {id:'d3',name:'Tiago',phone:'',tags:['Vans','Madrugadas'],on:true,home:'v2',vehicles:['v1','v2','v3'],types:DEF_TYPES.map(function(x){return x[0];}).filter(function(x){return x!=='Tour'&&x!=='Casamento';}),docs:[{id:uid(),type:'Carta de condução',expiry:'2030-11-20'},{id:uid(),type:'Certificado de motorista',expiry:addDays(t,-3)}]}
   ];
   var DN={d1:'Fábio',d2:'Rui',d3:'Tiago'},PN={p1:'Arrivals Lisboa',p2:'Atlântico Executive',p3:'Lusitânia Tours',p4:'Sete Colinas Transfers'};
   var CAT={v1:'Van VIP',v2:'Van',v3:'Van',v4:'Carro Executive'};
@@ -767,13 +774,13 @@ function seed(){
   ];
   var notices=[{id:'n1',at:at(t,'08:00'),by:'m1',to:'all',text:'Amanhã há um casamento em Évora. Fato escuro e gravata, por favor.'}];
   settings.payRules=[{id:uid(),driverId:'d3',type:'Chegada aeroporto',cat:'',origin:'',amount:7,from:t}];
-  return {v:5,role:'m1',masters:masters,partners:partners,vehicles:vehicles,drivers:drivers,services:services,settings:settings,unavail:unavail,priv:priv,genExp:genExp,driverPays:driverPays,notices:notices,noticeSeen:{},audit:audit};
+  return {v:6,role:'m1',masters:masters,partners:partners,vehicles:vehicles,drivers:drivers,services:services,settings:settings,unavail:unavail,priv:priv,genExp:genExp,driverPays:driverPays,notices:notices,noticeSeen:{},audit:audit};
 }
 
 /* ---------- state ---------- */
 var S=null;
 try{var raw=localStorage.getItem(LS);if(raw)S=JSON.parse(raw);}catch(e){S=null;}
-if(!S||S.v!==5||!Array.isArray(S.services))S=seed();
+if(!S||S.v!==6||!Array.isArray(S.services))S=seed();
 (function fill(){
   var d=defaultSettings();S.settings=S.settings||d;
   Object.keys(d).forEach(function(k){if(S.settings[k]==null)S.settings[k]=d[k];});
@@ -916,6 +923,18 @@ function capIssues(s,v){
   return out;
 }
 
+/* ---------- who can do what ----------
+   A missing list means no restriction: the driver drives every vehicle, does every type; the vehicle serves every type. */
+function allows(list,x){return !Array.isArray(list)||!x||list.indexOf(x)>-1;}
+function typeTxt(t){return 'serviços do tipo '+t;}
+function fitIssues(s,d,v){
+  var out=[];if(isExt(s))return out;
+  if(d&&!allows(d.types,s.event))out.push(d.name+' não faz '+typeTxt(s.event)+'.');
+  if(d&&v&&!allows(d.vehicles,v.id))out.push(d.name+' não conduz o '+v.name+'.');
+  if(v&&!allows(v.types,s.event))out.push('O '+v.name+' não serve para '+typeTxt(s.event)+'.');
+  return out;
+}
+
 /* ---------- time occupancy, overlaps, days off ---------- */
 function durOf(s){var a=mins(s.time),e=mins(s.end);if(a!=null&&e!=null){var d=e-a;if(d<=0)d+=1440;return d;}var d2=parseInt(s.dur,10);if(isFinite(d2)&&d2>0)return d2;return s.event?typeDur(s.event):S.settings.defaultDur;}
 function waitOf(s){var w=parseInt(s.wait,10);return isFinite(w)&&w>=0?w:S.settings.wait;}
@@ -957,6 +976,7 @@ function serviceAdvice(s){
   var out=[];
   if(isExt(s)||['cancelado','recusado','concluido','no_show'].indexOf(s.status)>-1)return out;
   var d=drv(s.driverId),v=veh(s.vehicleId);
+  fitIssues(s,d,v).forEach(function(t){out.push(t);});
   if(d){
     if(!d.on)out.push(d.name+' está marcado como indisponível.');
     unavailFor(d.id,s).forEach(function(u){out.push(unavText(u,d.name));});
@@ -978,6 +998,7 @@ function conflictOf(s){
   var ov=overlaps(s,'driverId',s.driverId).concat(overlaps(s,'vehicleId',s.vehicleId));
   if(ov.some(isOv))return 'Sobreposição';
   if(s.driverId&&unavailFor(s.driverId,s).length)return 'Driver de folga';
+  if(fitIssues(s,drv(s.driverId),veh(s.vehicleId)).length)return 'Não compatível';
   var v=veh(s.vehicleId),d=drv(s.driverId);
   if(v&&vBlockOn(v,s.date))return 'Em manutenção';
   if(docsExpiredAt(d,s.date).length||docsExpiredAt(v,s.date).length)return 'Documento expirado';
@@ -990,8 +1011,58 @@ function adviceBlock(arr){
   return '<details class="notice"><summary>'+(arr.length===1?'1 aviso':arr.length+' avisos')+'</summary>'+arr.map(function(t){return '<p>'+esc(t)+'</p>';}).join('')+'<p class="hint">A decisão é tua. Podes manter e enviar na mesma.</p></details>';
 }
 function busyLabel(ov){if(!ov.length)return '';var o=ov.filter(isOv)[0];return o?', ocupado '+hm(o.b)+'–'+hm(o.bEnd):', intervalo curto';}
-function optLabelD(x,svc){var un=unavailFor(x.id,svc),dx=docsExpiredAt(x,svc.date);return x.name+(x.on?'':' (indisponível)')+(un.length?', de folga':dx.length?', documento expirado':busyLabel(overlaps(svc,'driverId',x.id)));}
-function optLabelV(x,svc){var b=vBlockOn(x,svc.date),cp=capIssues(svc,x);return x.name+(x.on?'':' (indisponível)')+(b?', em manutenção':busyLabel(overlaps(svc,'vehicleId',x.id)))+(cp.length?', pouca capacidade':'');}
+/* Why a driver or a vehicle cannot take this service right now; empty when it can. */
+function drvBlock(x,s){
+  if(!x.on)return 'indisponível';
+  if(!allows(x.types,s.event))return 'não faz este tipo';
+  if(unavailFor(x.id,s).length)return 'de folga';
+  if(docsExpiredAt(x,s.date).length)return 'documento expirado';
+  var v=veh(s.vehicleId);if(v&&!allows(x.vehicles,v.id))return 'não conduz o '+v.name;
+  var o=overlaps(s,'driverId',x.id).filter(isOv)[0];if(o)return 'ocupado '+hm(o.b)+'–'+hm(o.bEnd);
+  return '';
+}
+function vehBlock(x,s){
+  if(!x.on)return 'indisponível';
+  if(vBlockOn(x,s.date))return 'em manutenção';
+  if(docsExpiredAt(x,s.date).length)return 'documento expirado';
+  if(!allows(x.types,s.event))return 'não serve para este tipo';
+  var d=drv(s.driverId);if(d&&!allows(d.vehicles,x.id))return d.name+' não conduz';
+  if(capIssues(s,x).length)return 'pouca capacidade';
+  var o=overlaps(s,'vehicleId',x.id).filter(isOv)[0];if(o)return 'ocupado '+hm(o.b)+'–'+hm(o.bEnd);
+  return '';
+}
+function optLabelD(x,svc){var b=drvBlock(x,svc);return x.name+(b?', '+b:overlaps(svc,'driverId',x.id).length?', intervalo curto':'');}
+function optLabelV(x,svc){var b=vehBlock(x,svc);return x.name+(b?', '+b:overlaps(svc,'vehicleId',x.id).length?', intervalo curto':svc.vtype&&x.cat!==svc.vtype?', é '+x.cat:'');}
+function dayLoad(dId,s){return S.services.filter(function(o){return o.id!==s.id&&o.driverId===dId&&o.date===s.date&&!isExt(o)&&busyFor(o);}).length;}
+/* Best free, qualified driver and vehicle for a service. Keeps what is already chosen, skips whoever refused it.
+   Prefers: the vehicle category asked for, no tight gaps, the driver's usual vehicle, the lighter day, the smallest vehicle that fits. */
+function suggest(s){
+  if(isExt(s)||!s.date)return null;
+  var refused=s.status==='recusado'?(s.declinedBy||s.driverId):'';
+  var fixD=s.driverId&&s.driverId!==refused?s.driverId:'',fixV=refused?'':(s.vehicleId||'');
+  var best=null;
+  live(S.drivers).forEach(function(d){
+    if(d.id===refused||(fixD&&d.id!==fixD))return;
+    var probe=Object.assign({},s,{driverId:'',vehicleId:''});
+    if(drvBlock(d,probe))return;
+    var ds=(overlaps(s,'driverId',d.id).length?20:0)+dayLoad(d.id,s)*3;
+    live(S.vehicles).forEach(function(v){
+      if(fixV&&v.id!==fixV)return;
+      if(!allows(d.vehicles,v.id)||vehBlock(v,probe))return;
+      var vs=(s.vtype&&v.cat!==s.vtype?30:0)+(overlaps(s,'vehicleId',v.id).length?20:0)+(d.home===v.id?-8:0)+Math.max(0,(+v.seats||0)-num(s.pax,1))*0.5;
+      if(!best||ds+vs<best.sc)best={d:d,v:v,sc:ds+vs};
+    });
+  });
+  if(!best)return null;
+  var why=[],n=dayLoad(best.d.id,s),tight=overlaps(s,'driverId',best.d.id).length||overlaps(s,'vehicleId',best.v.id).length;
+  why.push(tight?'Livre, mas com intervalo curto':'Livre a essa hora');
+  why.push(n?plural(n,'outro serviço','outros serviços')+' nesse dia':'sem outros serviços nesse dia');
+  if(best.d.home===best.v.id)why.push('é o veículo habitual de '+best.d.name);
+  if(s.vtype&&best.v.cat!==s.vtype)why.push('foi pedido '+s.vtype+', este é '+best.v.cat);
+  best.why=cap(why.join(', '))+'.';
+  return best;
+}
+function sugLabel(g){return g.d.name+' com o '+g.v.name;}
 
 /* ---------- what drivers can see ---------- */
 function driverOwns(s,me){if(isExt(s)||s.driverId!==me)return false;if(DRV_ST.indexOf(s.status)>-1)return true;return s.status==='cancelado'&&!!s.sentAt;}
@@ -1311,8 +1382,12 @@ function servicosBody(){
   var f=ui.filter;
   h+=segHTML('filter',[['acao','A tratar',nTodo],['hoje','Hoje'],['amanha','Amanhã'],['depois','Depois']],f)+fl;
   if(f==='acao'){
-    if(A.length)h+=sec('Por alocar','<div class="group">'+A.map(function(s){return rowHTML(s,'master',{day:true,qa:{act:'qAlloc',label:'Alocar'}});}).join('')+'</div>');
-    if(R.length)h+=sec('Recusados','<div class="group">'+R.map(function(s){var d=drv(s.declinedBy||s.driverId);return rowHTML(s,'master',{day:true,qa:{act:'qAlloc',label:'Escolher outro driver'},note:(d?d.name+': ':'')+'“'+(s.declineReason||'sem motivo')+'”'});}).join('')+'</div>');
+    var sugQa=function(s,fallback){var g=suggest(s);return g?{act:'qSug',label:'Alocar '+g.d.name+' e '+g.v.name}:{act:'qAlloc',label:fallback};};
+    var nSug=A.concat(R).filter(function(s){return !!suggest(s);}).length;
+    var aConf=ui.confirmAlloc?'<div class="confirm"><p>Alocar '+plural(nSug,'serviço','serviços')+' às sugestões? Ficam em Por enviar, para reveres antes de enviar.</p><div class="row2"><button type="button" class="btn alt sm" data-act="allocAllNo">Cancelar</button><button type="button" class="btn sm" data-act="allocAllYes">Alocar</button></div></div>':'';
+    var aAct=nSug>1&&!ui.confirmAlloc?'<button type="button" class="tbtn" data-act="allocAll">Alocar sugeridos</button>':'';
+    if(A.length)h+=sec('Por alocar',aConf+'<div class="group">'+A.map(function(s){return rowHTML(s,'master',{day:true,qa:sugQa(s,'Escolher driver e veículo')});}).join('')+'</div>',aAct);
+    if(R.length)h+=sec('Recusados',(A.length?'':aConf)+'<div class="group">'+R.map(function(s){var d=drv(s.declinedBy||s.driverId);return rowHTML(s,'master',{day:true,qa:sugQa(s,'Escolher outro driver'),note:(d?d.name+': ':'')+'“'+(s.declineReason||'sem motivo')+'”'});}).join('')+'</div>',A.length?'':aAct);
     if(E.length){
       var ints=E.filter(function(s){return !isExt(s);});
       var act=ints.length>1&&!ui.confirmAll?'<button type="button" class="tbtn" data-act="sendAll">Enviar todos</button>':'';
@@ -1875,9 +1950,17 @@ function doCopy(el){
 
 /* ---------- main events ---------- */
 Object.assign(mainAct,{
-  filter:function(el){ui.filter=el.dataset.v;ui.confirmAll=false;render();},
+  filter:function(el){ui.filter=el.dataset.v;ui.confirmAll=false;ui.confirmAlloc=false;render();},
   qSend:function(el){var s=svcById(el.dataset.id);if(!s)return;sendService(s);save();render();toast('Enviado a '+drv(s.driverId).name);},
   qAlloc:function(el){openDetail(el.dataset.id);},
+  qSug:function(el){var s=svcById(el.dataset.id);if(!s)return;var g=suggest(s);if(!g){openDetail(s.id);return;}applyAlloc(s,g.d.id,g.v.id);log(s,'alterado',S.role,'Alocado a '+g.d.name+', '+g.v.name);save();render();toast('Alocado: '+sugLabel(g)+'. Está em Por enviar.');},
+  allocAll:function(){ui.confirmAlloc=true;render();},
+  allocAllNo:function(){ui.confirmAlloc=false;render();},
+  allocAllYes:function(){
+    var td=todoLists(),l=td.alocar.concat(td.recus).filter(sfMatch).sort(byWhen),n=0,left=0;
+    l.forEach(function(s){var g=suggest(s);if(!g){left++;return;}applyAlloc(s,g.d.id,g.v.id);log(s,'alterado',S.role,'Alocado a '+g.d.name+', '+g.v.name);n++;});
+    ui.confirmAlloc=false;save();render();toast(plural(n,'serviço alocado','serviços alocados')+(left?'. '+plural(left,'ficou sem sugestão','ficaram sem sugestão'):'')+'. Revê e envia.');
+  },
   qDeliver:function(el){var s=svcById(el.dataset.id);if(s)openDeliver(s,function(){closeSheet();});},
   qDone:function(el){var s=svcById(el.dataset.id);if(!s)return;markDone(s);save();render();toast('Marcado como concluído');},
   sendAll:function(){ui.confirmAll=true;render();},
@@ -2169,13 +2252,33 @@ function returnOf(s){
   return {date:s.date,time:'',pickup:s.dropoff,dropoff:s.pickup,name:s.name,phone:s.phone,email:s.email,ctype:s.ctype,pax:s.pax,checked:s.checked,cabin:s.cabin,booster:s.booster,vtype:s.vtype,event:ev,channel:s.channel,notes:s.notes,req:s.req,
     origin:s.origin,originPartnerId:s.originPartnerId,billName:s.billName,billNif:s.billNif,vatRate:s.vatRate,priceVat:s.priceVat};
 }
+function groupedOpts(list,cur,blockFn,labelFn,rank){
+  var ok=[],bad=[];
+  list.filter(function(x){return !x.removed||x.id===cur;}).forEach(function(x){(blockFn(x)?bad:ok).push(x);});
+  if(rank)ok.sort(function(a,b){return rank(a)-rank(b);});
+  function o(x){return '<option value="'+esc(x.id)+'"'+(x.id===cur?' selected':'')+(!x.on&&x.id!==cur?' disabled':'')+'>'+esc(labelFn(x))+'</option>';}
+  return (ok.length?'<optgroup label="Livres e habilitados">'+ok.map(o).join('')+'</optgroup>':'')+(bad.length?'<optgroup label="Com impedimentos">'+bad.map(o).join('')+'</optgroup>':'');
+}
+function sugHTML(s,act){
+  if(s.driverId&&s.vehicleId&&s.status!=='recusado'){
+    var c=conflictOf(s);if(!c||c==='Intervalo curto')return '';
+    var alt=suggest(Object.assign({},s,{driverId:'',vehicleId:''}));if(!alt)return '';
+    return '<div class="sug"><span class="k">Alternativa sem conflito</span><b>'+esc(sugLabel(alt))+'</b><span class="s">'+esc(alt.why)+'</span><button type="button" class="btn sm alt" data-act="'+act+'" data-d="'+esc(alt.d.id)+'" data-v="'+esc(alt.v.id)+'">Trocar para '+esc(alt.d.name)+' e '+esc(alt.v.name)+'</button></div>';
+  }
+  var g=suggest(s);
+  if(!g)return '<div class="sug none"><span class="k">Sem sugestão</span><span class="s">Ninguém está livre e habilitado'+(s.driverId&&s.status!=='recusado'?' com este driver':'')+'. Escolhe na lista, muda a hora ou passa a um parceiro.</span></div>';
+  return '<div class="sug"><span class="k">Sugestão</span><b>'+esc(sugLabel(g))+'</b><span class="s">'+esc(g.why)+'</span><button type="button" class="btn sm" data-act="'+act+'" data-d="'+esc(g.d.id)+'" data-v="'+esc(g.v.id)+'">Alocar '+esc(g.d.name)+' e '+esc(g.v.name)+'</button></div>';
+}
+function applyAlloc(s,dId,vId){
+  if(s.status==='recusado'){if(!s.declinedBy)s.declinedBy=s.driverId;s.status='pendente';s.sentAt=null;}
+  s.driverId=dId;s.vehicleId=vId;
+}
 function allocBoxHTML(s){
   var ext=isExt(s),h='<div class="alloc"><h3>Quem faz este serviço?</h3><div class="seg in" role="group" aria-label="Quem faz"><button type="button" data-act="exSeg" data-v="int" aria-pressed="'+!ext+'">A nossa equipa</button><button type="button" data-act="exSeg" data-v="ext" aria-pressed="'+ext+'">Um parceiro</button></div>';
   if(!ext){
-    var dO=S.drivers.filter(function(x){return !x.removed||x.id===s.driverId;}).map(function(x){return '<option value="'+esc(x.id)+'"'+(x.id===s.driverId?' selected':'')+(!x.on&&x.id!==s.driverId?' disabled':'')+'>'+esc(optLabelD(x,s))+'</option>';}).join('');
-    var vO=S.vehicles.filter(function(x){return !x.removed||x.id===s.vehicleId;}).map(function(x){return '<option value="'+esc(x.id)+'"'+(x.id===s.vehicleId?' selected':'')+(!x.on&&x.id!==s.vehicleId?' disabled':'')+'>'+esc(optLabelV(x,s))+'</option>';}).join('');
-    h+='<div class="f"><label for="d_driver">Driver</label><select id="d_driver"><option value="">Escolher driver</option>'+dO+'</select></div>'+
-      '<div class="f"><label for="d_vehicle">Veículo</label><select id="d_vehicle"><option value="">Escolher veículo</option>'+vO+'</select></div><p class="hint">A lista mostra quem está ocupado, de folga ou com documentos expirados.</p>';
+    h+=sugHTML(s,'sugUse');
+    h+='<div class="f"><label for="d_driver">Driver</label><select id="d_driver"><option value="">Escolher driver</option>'+groupedOpts(S.drivers,s.driverId,function(x){var p=Object.assign({},s,{driverId:''});return drvBlock(x,p);},function(x){return optLabelD(x,Object.assign({},s,{driverId:''}));})+'</select></div>'+
+      '<div class="f"><label for="d_vehicle">Veículo</label><select id="d_vehicle"><option value="">Escolher veículo</option>'+groupedOpts(S.vehicles,s.vehicleId,function(x){var p=Object.assign({},s,{vehicleId:''});return vehBlock(x,p);},function(x){return optLabelV(x,Object.assign({},s,{vehicleId:''}));},function(x){return s.vtype&&x.cat!==s.vtype?1:0;})+'</select></div><p class="hint">Primeiro aparecem os que estão livres e podem fazer este serviço.</p>';
   }else{
     var pO=S.partners.filter(function(p){return (!p.removed&&p.does)||p.id===s.execPartnerId;}).map(function(p){return '<option value="'+esc(p.id)+'"'+(p.id===s.execPartnerId?' selected':'')+'>'+esc(p.name)+'</option>';}).join('');
     h+='<div class="f"><label for="d_partner">Parceiro que faz</label><select id="d_partner"><option value="">Escolher parceiro</option>'+pO+'</select></div>';
@@ -2223,8 +2326,11 @@ function openDetail(id,back){
       if(t.id==='d_cost'){var old=s.cost;s.cost=t.value===''?'':r2(t.value);if(String(old)!==String(s.cost))log(s,'valores',S.role,'Custo do parceiro: '+(blank(s.cost)?'sem valor':eur(s.cost)),true);}
       if(t.id==='d_costVat')s.costVat=t.value;
       if(s.status==='recusado'&&((s.driverId&&s.driverId!==s.declinedBy)||isExt(s))){s.status='pendente';s.sentAt=null;}
-      save();render();self();
+      var auto='';
+      if(t.id==='d_driver'&&s.driverId&&!s.vehicleId){var g=suggest(s);if(g){s.vehicleId=g.v.id;auto=g.v.name;}}
+      save();render();self();if(auto)toast('Veículo escolhido: '+auto);
     },
+    sugUse:function(el){applyAlloc(s,el.dataset.d,el.dataset.v);log(s,'alterado',S.role,'Alocado a '+drv(s.driverId).name+', '+veh(s.vehicleId).name);save();render();self();toast('Alocado: '+drv(s.driverId).name+' com o '+veh(s.vehicleId).name);},
     exSeg:function(el){
       var to=el.dataset.v;if(to===(isExt(s)?'ext':'int'))return;
       if(to==='ext'){s.exec='ext';s.driverId='';s.vehicleId='';log(s,'execucao',S.role,'Passou para um parceiro');}
@@ -2348,7 +2454,7 @@ function openEditor(existing,prefill,opts){
       '<div id="o_partner" style="display:grid;gap:14px">'+F('originPartnerId','Parceiro que nos entrega',OPTS('originPartnerId',giveO,'Escolher parceiro','Novo parceiro…'))+
         '<div id="o_new" hidden>'+F('newOP','Nome do novo parceiro','<input id="f_newOP" type="text">')+'</div>'+F('pref','Referência do parceiro',I('pref','text','autocomplete="off" placeholder="O número da reserva na app ou no email deles"'))+'</div></fieldset>'+
     '<fieldset id="execSet"><legend>Quem faz</legend><div class="seg in" role="group" aria-label="Quem faz"><button type="button" data-act="eSeg" data-v="int" aria-pressed="'+(ui.editorPending.exec==='int')+'">A nossa equipa</button><button type="button" data-act="eSeg" data-v="ext" aria-pressed="'+(ui.editorPending.exec==='ext')+'">Um parceiro</button></div>'+
-      '<div id="e_int" style="display:grid;gap:14px">'+F('driverId','Driver',OPTS('driverId',drvO,'Escolher driver'))+'<div id="w_driver"></div>'+F('vehicleId','Veículo',OPTS('vehicleId',vehO,'Escolher veículo'))+'<div id="w_vehicle"></div></div>'+
+      '<div id="e_int" style="display:grid;gap:14px"><div id="sugBox"></div>'+F('driverId','Driver',OPTS('driverId',drvO,'Escolher driver'))+'<div id="w_driver"></div>'+F('vehicleId','Veículo',OPTS('vehicleId',vehO,'Escolher veículo'))+'<div id="w_vehicle"></div></div>'+
       '<div id="e_ext" style="display:grid;gap:14px">'+F('execPartnerId','Parceiro que faz',OPTS('execPartnerId',doO,'Escolher parceiro','Novo parceiro…'))+'<div id="e_new" hidden>'+F('newEP','Nome do novo parceiro','<input id="f_newEP" type="text">')+'</div>'+
         '<p class="hint">Continua a ser um serviço só: a venda fica do lado de quem nos entrega e o custo do lado de quem faz.</p></div></fieldset>'+
     (cm?'<details class="fmore" id="valSet"'+(valOpen?' open':'')+'><summary><span>Valores</span><span class="cnt" id="valCnt">opcional</span></summary><div class="fmore-b">'+
@@ -2375,6 +2481,7 @@ function openEditor(existing,prefill,opts){
   openSheet(title,body,foot,{
     save:function(){saveService(false);},
     saveSend:function(){saveService(true);},
+    sugE:function(el){$('#f_driverId').value=el.dataset.d;$('#f_vehicleId').value=el.dataset.v;updateEditor();toast('Escolhido: '+drv(el.dataset.d).name+' com o '+veh(el.dataset.v).name);},
     oSeg:function(el){ui.editor.origin=el.dataset.v;$$('[data-act="oSeg"]').forEach(function(b){b.setAttribute('aria-pressed',String(b===el));});updateEditor();},
     eSeg:function(el){ui.editor.exec=el.dataset.v;$$('[data-act="eSeg"]').forEach(function(b){b.setAttribute('aria-pressed',String(b===el));});updateEditor();},
     addStop:function(){var box=$('#stopsBox');box.insertAdjacentHTML('beforeend',stopRow(''));var ins=$$('.stopIn',box);try{ins[ins.length-1].focus();}catch(e){}},
@@ -2396,8 +2503,9 @@ function updateEditor(){
   var ev=g('event').value,def=ev?typeDur(ev):S.settings.defaultDur,st=mins(g('time').value);
   var he=$('#h_end');if(he)he.textContent=g('end').value?'':'Em branco, conta '+fmtMin(def)+(ev?' ('+ev.toLowerCase()+')':'')+(st!=null?', até às '+hm(st+def):'')+'.';
   var tmp={id:E.existing?E.existing.id:'_new',date:g('date').value,time:g('time').value,end:g('end').value,event:ev,exec:E.exec,pax:g('pax').value,checked:g('checked').value,cabin:g('cabin').value,vtype:g('vtype').value,status:'pendente'};
-  $$('#f_driverId option').forEach(function(op){var x=drv(op.value);if(x)op.textContent=optLabelD(x,tmp);});
-  $$('#f_vehicleId option').forEach(function(op){var x=veh(op.value);if(x)op.textContent=optLabelV(x,tmp);});
+  var tmpD=Object.assign({},tmp,{vehicleId:g('vehicleId').value}),tmpV=Object.assign({},tmp,{driverId:g('driverId').value});
+  $$('#f_driverId option').forEach(function(op){var x=drv(op.value);if(x)op.textContent=optLabelD(x,tmpD);});
+  $$('#f_vehicleId option').forEach(function(op){var x=veh(op.value);if(x)op.textContent=optLabelV(x,tmpV);});
   var vId=g('vehicleId').value,dId=g('driverId').value,wv=[],wd=[];
   if(E.exec==='int'){
     if(vId){var vv=veh(vId);
@@ -2412,6 +2520,8 @@ function updateEditor(){
       var ex=E.existing;if(ex&&ex.status==='recusado'&&(ex.declinedBy||ex.driverId)===dId)wd.push(dd.name+' recusou este serviço.');}
   }
   setWarn('w_vehicle',wv);setWarn('w_driver',wd);
+  var sb0=$('#sugBox');if(sb0){var sbh=E.exec==='int'&&tmp.date?sugHTML(Object.assign({},tmp,{driverId:dId,vehicleId:vId,status:'pendente'}),'sugE'):'';if(sb0.dataset.h!==sbh){sb0.innerHTML=sbh;sb0.dataset.h=sbh;}}
+  fitIssues(tmp,drv(dId),veh(vId)).forEach(function(t){(t.indexOf('O ')===0?wv:wd).push(t);});setWarn('w_vehicle',wv);setWarn('w_driver',wd);
   var hp=$('#h_pay');if(hp){var pi2=payInfo({exec:'int',driverId:dId,vehicleId:vId,event:ev,date:tmp.date,origin:E.origin,originPartnerId:g('originPartnerId').value});hp.textContent=pi2.v==null?'Em branco, usa os valores definidos em Valores, IVA e prazos. Ainda não há valor para esta combinação.':'Em branco, o driver recebe '+eur(pi2.v)+' ('+paySrcText(pi2).charAt(0).toLowerCase()+paySrcText(pi2).slice(1)+').';}
   if($('#mprev')){
     var ex2=E.existing,tm={exec:E.exec,status:'pendente',price:g('price').value,priceVat:g('priceVat').value,vatRate:g('vatRate').value,cost:g('cost').value,costVat:g('costVat').value,costRate:g('costRate').value,costDed:g('costDed').checked,pay:g('pay').value,vehicleId:vId,driverId:dId,event:ev,originPartnerId:g('originPartnerId').value,expenses:ex2?ex2.expenses:[],receipts:[],payouts:[],date:tmp.date,origin:E.origin};
@@ -2779,11 +2889,30 @@ function docRow(types,x){
 }
 function readDocs(){return $$('#docsBox .doc').map(function(r){return {id:uid(),type:$('.dT',r).value,expiry:$('.dE',r).value};}).filter(function(d){return d.type;});}
 function docsBlock(o,types){return '<h3 style="margin:26px 0 4px;font:600 17px/1.3 var(--f-body)">Documentos</h3><p class="hint" style="margin-bottom:12px">Avisamos 30 dias antes de expirar e quando alocas um serviço depois da validade.</p><div class="lbox" id="docsBox">'+((o&&o.docs)||[]).map(function(x){return docRow(types,x);}).join('')+'</div><button type="button" class="tbtn" data-act="addDoc" style="padding:8px 0 0">Adicionar documento</button>';}
+/* Multi-select chips. Everything selected is stored as null: no restriction, and new types or vehicles are included automatically. */
+function chipSet(key,opts,sel){
+  var all=!Array.isArray(sel);
+  return '<div class="chips" data-chips="'+key+'">'+opts.map(function(o){var on=all||sel.indexOf(o[0])>-1;return '<button type="button" class="chip-btn" data-act="chipT" data-v="'+esc(o[0])+'" aria-pressed="'+on+'">'+esc(o[1])+'</button>';}).join('')+'</div>';
+}
+function chipToggle(el){el.setAttribute('aria-pressed',String(el.getAttribute('aria-pressed')!=='true'));}
+function readChips(key){
+  var b=$$('[data-chips="'+key+'"] .chip-btn');if(!b.length)return null;
+  var on=b.filter(function(x){return x.getAttribute('aria-pressed')==='true';}).map(function(x){return x.dataset.v;});
+  return on.length===b.length?null:on;
+}
+function canDoBlock(r){
+  var V=S.vehicles.filter(function(v){return !v.removed;});
+  return '<h3 style="margin:26px 0 4px;font:600 17px/1.3 var(--f-body)">O que pode fazer</h3><p class="hint" style="margin-bottom:12px">Toca para marcar ou desmarcar. A app só sugere o que está marcado e avisa se escolheres outra coisa.</p>'+
+    '<div class="f" style="margin-bottom:14px"><span class="lab">Veículos que conduz</span>'+chipSet('cveh',V.map(function(v){return [v.id,v.name];}),r?r.vehicles:null)+'</div>'+
+    '<div class="f" style="margin-bottom:14px"><span class="lab">Tipos de serviço</span>'+chipSet('ctyp',S.settings.types.map(function(t){return [t.name,t.name];}),r?r.types:null)+'</div>'+
+    '<div class="f"><label for="r_home">Veículo habitual</label><select id="r_home"><option value="">Nenhum</option>'+V.map(function(v){return '<option value="'+esc(v.id)+'"'+(r&&r.home===v.id?' selected':'')+'>'+esc(v.name)+'</option>';}).join('')+'</select><p class="hint">Quando há escolha, a sugestão prefere este.</p></div>';
+}
 function openDriverEditor(id,back){
   var r=id?drv(id):null,self=function(){openDriverEditor(id,back);};
   var fol=r?folgaRows(r.id,true):[];
   var body='<form id="resForm" novalidate style="display:grid;gap:16px">'+fld('r_name','Nome',r?r.name:'')+'<p class="err" id="e_r_name" hidden></p>'+fld('r_phone','Telefone',r?r.phone:'','tel')+
     '<div class="f"><label for="r_tags">Especialidades</label><input id="r_tags" type="text" value="'+esc(r?r.tags.join(', '):'')+'" placeholder="Por exemplo, VIP, inglês, vans"><p class="hint">Separadas por vírgulas.</p></div></form>'+
+    canDoBlock(r)+
     docsBlock(r,DOC_D)+
     (r?'<h3 style="margin:26px 0 8px;font:600 17px/1.3 var(--f-body)">Folgas</h3>'+(fol.length?'<div class="group">'+fol.join('')+'</div>':'<p class="hint">Sem folgas marcadas.</p>')+'<button type="button" class="tbtn" data-act="addFolga" style="padding:8px 0 0">Marcar folga</button>':'')+
     (r&&canMoney()?'<h3 style="margin:26px 0 6px;font:600 17px/1.3 var(--f-body)">Valores de '+esc(r.name)+'</h3>'+(function(){var mine=payRules().filter(function(x){return x.driverId===r.id;});return mine.length?rulesList(mine):'<p class="hint">Recebe os valores base do veículo.</p>';})()+'<button type="button" class="tbtn" data-act="rNew" style="padding:8px 0 0">Adicionar valor para '+esc(r.name)+'</button>':'')+
@@ -2795,11 +2924,12 @@ function openDriverEditor(id,back){
     addFolga:function(){openFolgaForm(r.id,self);},
     unRm:function(el){S.unavail=S.unavail.filter(function(u){return u.id!==el.dataset.id;});save();self();toast('Folga removida');},
     acc:function(){openDriverAccount(r.id,null,self);},
+    chipT:chipToggle,
     rNew:function(){openRuleForm(null,{driverId:r.id},self);},
     rEdit:function(el){openRuleForm(el.dataset.id,null,self);},
     save:function(){
       var n=$('#r_name').value.trim();if(!n){var e=$('#e_r_name');e.textContent='Indica o nome.';e.hidden=false;return;}
-      var o=r||{id:'d'+uid(),on:true};o.name=n;o.phone=$('#r_phone').value.trim();o.tags=$('#r_tags').value.split(',').map(function(x){return x.trim();}).filter(Boolean);o.docs=readDocs();
+      var o=r||{id:'d'+uid(),on:true};o.name=n;o.phone=$('#r_phone').value.trim();o.tags=$('#r_tags').value.split(',').map(function(x){return x.trim();}).filter(Boolean);o.docs=readDocs();o.vehicles=readChips('cveh');o.types=readChips('ctyp');o.home=$('#r_home').value;
       if(!r){S.drivers.push(o);audit('Driver adicionado: '+n);}
       save();toast(r?'Alterações guardadas':'Driver adicionado');if(back)back();else closeSheet();
     },
@@ -2820,6 +2950,7 @@ function openVehicleEditor(id,back){
     '<div class="g2">'+fld('r_plate','Matrícula',r?r.plate:'','text','autocapitalize="characters" placeholder="AA-00-AA"')+'<div class="f"><label for="r_cat">Categoria</label><select id="r_cat">'+VTYPES.map(function(x){return '<option'+(r&&r.cat===x?' selected':'')+'>'+esc(x)+'</option>';}).join('')+'</select></div></div>'+
     '<div class="g3">'+fld('r_seats','Lugares',r?r.seats:'','number','min="1" inputmode="numeric"')+fld('r_bags','Malas',r?r.bags:'','number','min="0" inputmode="numeric"')+fld('r_km','Quilómetros',r?r.km:'','number','min="0" step="100" inputmode="numeric"')+'</div>'+
     '<p class="hint">Com lugares e malas, avisamos quando um serviço não cabe no veículo.</p></form>'+
+    '<h3 style="margin:26px 0 4px;font:600 17px/1.3 var(--f-body)">Serve para</h3><p class="hint" style="margin-bottom:10px">Os tipos de serviço que este veículo pode fazer. Todos marcados quer dizer sem restrições.</p>'+chipSet('ctyp',S.settings.types.map(function(t){return [t.name,t.name];}),r?r.types:null)+
     docsBlock(r,DOC_V)+
     '<h3 style="margin:26px 0 4px;font:600 17px/1.3 var(--f-body)">Manutenção</h3><p class="hint" style="margin-bottom:12px">Nestes dias o veículo fica indisponível e avisamos se tiver serviços.</p><div class="lbox" id="blkBox">'+((r&&r.blocks)||[]).filter(function(b){return (b.to||b.from)>=t0;}).map(blockRow).join('')+'</div><button type="button" class="tbtn" data-act="addBlk" style="padding:8px 0 0">Marcar manutenção</button>'+
     (r&&canMoney()?'<h3 style="margin:26px 0 8px;font:600 17px/1.3 var(--f-body)">Despesas do veículo</h3>'+(exps.length?'<div class="group">'+exps.slice(0,10).map(function(g){return '<button type="button" class="mrow" data-act="gEdit" data-id="'+esc(g.id)+'"><span class="d">'+esc(dmy(g.date))+'</span><span class="m"><b>'+esc(g.cat)+'</b><span>'+esc(g.note||'Sem nota')+'</span></span><span class="a">'+eur(g.amount)+'</span></button>';}).join('')+'</div>':'<p class="hint">Sem despesas registadas.</p>')+'<button type="button" class="tbtn" data-act="gNew" style="padding:8px 0 0">Registar despesa</button>':'')+'<div id="resMsg"></div>';
@@ -2828,7 +2959,7 @@ function openVehicleEditor(id,back){
     var o=r||{id:'v'+uid(),on:true,blocks:[],docs:[]};
     o.name=n;o.plate=$('#r_plate').value.trim().toUpperCase();o.cat=$('#r_cat').value;
     ['seats','bags','km'].forEach(function(k){var x=parseInt($('#r_'+k).value,10);o[k]=isFinite(x)&&x>=0?x:'';});
-    o.docs=readDocs();
+    o.docs=readDocs();o.types=readChips('ctyp');
     var old=(o.blocks||[]).filter(function(b){return (b.to||b.from)<t0;});
     o.blocks=old.concat($$('#blkBox .blkrow').map(function(x){var f=$('.bF',x).value,t=$('.bT',x).value||f;if(!f)return null;if(t<f){var z=f;f=t;t=z;}return {id:uid(),from:f,to:t,reason:$('.bR',x).value.trim()};}).filter(Boolean));
     return o;
@@ -2838,6 +2969,7 @@ function openVehicleEditor(id,back){
     addDoc:function(){$('#docsBox').insertAdjacentHTML('beforeend',docRow(DOC_V,null));},
     rmRow:function(el){var x=el.closest('.lrow');if(x)x.remove();},
     addBlk:function(){$('#blkBox').insertAdjacentHTML('beforeend',blockRow(null));},
+    chipT:chipToggle,
     rmBlk:function(el){var x=el.closest('.blkrow');if(x)x.remove();},
     gEdit:function(el){var o=collectV();if(!o)return;if(!r)S.vehicles.push(o);save();openGenForm(el.dataset.id,null,self);},
     gNew:function(){var o=collectV();if(!o)return;save();openGenForm(null,{vehicleId:r.id,cat:'Manutenção'},self);},
