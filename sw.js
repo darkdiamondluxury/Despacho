@@ -1,5 +1,5 @@
-/* Despacho 6.5: works offline, always tries the network first for the app itself so updates arrive. */
-var C='despacho-6.5';
+/* Despacho 6.7: works offline, always tries the network first for the app itself so updates arrive. */
+var C='despacho-6.7';
 var ASSETS=['./','./index.html','./manifest.webmanifest','./apple-touch-icon.png','./icon-192.png','./icon-512.png','./icon-maskable-512.png','./favicon-32.png','./fonts/nunito.woff2'];
 self.addEventListener('install',function(e){e.waitUntil(caches.open(C).then(function(c){return c.addAll(ASSETS);}).then(function(){return self.skipWaiting();}));});
 var OCR='despacho-ocr-1';
@@ -11,6 +11,6 @@ self.addEventListener('fetch',function(e){
     e.respondWith(fetch(r).then(function(res){var cp=res.clone();caches.open(C).then(function(c){c.put('./index.html',cp);});return res;}).catch(function(){return caches.match('./index.html');}));
     return;
   }
-  var bucket=u.pathname.indexOf('/ocr/')>-1?OCR:C;
+  var bucket=(u.pathname.indexOf('/ocr/')>-1||u.pathname.indexOf('/pdf/')>-1)?OCR:C;
   e.respondWith(caches.match(r).then(function(m){return m||fetch(r).then(function(res){if(res.ok){var cp=res.clone();caches.open(bucket).then(function(c){c.put(r,cp);});}return res;});}));
 });
