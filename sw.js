@@ -1,5 +1,5 @@
-/* Despacho 6.7: works offline, always tries the network first for the app itself so updates arrive. */
-var C='despacho-6.7';
+/* Despacho 7.1: works offline, always tries the network first for the app itself so updates arrive. */
+var C='despacho-7.1';
 var ASSETS=['./','./index.html','./manifest.webmanifest','./apple-touch-icon.png','./icon-192.png','./icon-512.png','./icon-maskable-512.png','./favicon-32.png','./fonts/nunito.woff2'];
 self.addEventListener('install',function(e){e.waitUntil(caches.open(C).then(function(c){return c.addAll(ASSETS);}).then(function(){return self.skipWaiting();}));});
 var OCR='despacho-ocr-1';
