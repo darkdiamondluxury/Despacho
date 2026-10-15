@@ -162,17 +162,18 @@ button,input,select,textarea{font:inherit;color:inherit}
 @media (max-width:860px){.services{padding-top:40px}.services .wrap{grid-template-columns:1fr}.services h2{position:static}}
 
 /* ---------- classe V ---------- */
-.vclass{position:relative;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);min-height:100svh;background:var(--green)}
-.vclass .img{position:relative;overflow:hidden;background:var(--green-2)}
-.vclass .img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:30% 55%;filter:saturate(.8)}
-.vclass .txt{padding:clamp(70px,12vh,140px) var(--pad);display:flex;flex-direction:column;justify-content:center}
-.vclass h2{font-size:clamp(2.6rem,1rem + 4.6vw,5.6rem);max-width:10ch}
-.vclass p{margin-top:22px;max-width:38ch;color:var(--ink);opacity:.9}
+.vclass{position:relative;min-height:100svh;display:flex;align-items:flex-end;background:var(--black);overflow:hidden;isolation:isolate}
+.vclass .img{position:absolute;inset:0;z-index:-2;background:var(--black)}
+.vclass .img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 45%;filter:saturate(.85)}
+.vclass::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(0deg,rgba(7,9,8,.94) 0%,rgba(7,9,8,.7) 38%,rgba(7,9,8,.15) 70%,rgba(7,9,8,.35) 100%)}
+.vclass .txt{position:relative;width:100%;padding:clamp(120px,30vh,320px) var(--pad) clamp(60px,10vh,110px);display:flex;flex-direction:column;justify-content:flex-end}
+.vclass h2{font-size:clamp(2.6rem,1rem + 4.6vw,5.6rem);max-width:12ch}
+.vclass p{margin-top:22px;max-width:40ch;color:var(--ink);opacity:.92}
 .facts{display:flex;flex-wrap:wrap;gap:34px;margin-top:40px}
 .facts div{min-width:120px}
-.facts b{display:block;font-family:var(--display);font-weight:400;font-size:clamp(1.6rem,1rem + 1.6vw,2.4rem);color:var(--gold);letter-spacing:-.02em;line-height:1}
+.facts b{display:block;font-family:var(--display);font-weight:300;font-size:clamp(1.6rem,1rem + 1.6vw,2.4rem);color:var(--gold);letter-spacing:-.01em;line-height:1}
 .facts span{display:block;margin-top:6px;color:var(--muted);font-size:.95rem}
-@media (max-width:860px){.vclass{grid-template-columns:1fr}.vclass .img{min-height:62svh}}
+@media (max-width:860px){.vclass .img img{object-position:40% 40%}.vclass::after{background:linear-gradient(0deg,rgba(7,9,8,.96) 0%,rgba(7,9,8,.8) 45%,rgba(7,9,8,.2) 75%,rgba(7,9,8,.4) 100%)}}
 
 /* ---------- reserva ---------- */
 .book{background:var(--green-2);padding:clamp(80px,14vh,170px) var(--pad)}
@@ -618,8 +619,12 @@ if(window.gsap && !reduce){
   // 4) Entradas suaves por secção
   const rise=(sel,trig)=>gsap.from(sel,{y:32,opacity:0,duration:1,stagger:.08,ease:E,scrollTrigger:{trigger:trig||sel,start:'top 82%'}});
   rise('.services h2','.services'); rise('.svc li','.svc');
-  rise('.vclass h2, .vclass p, .facts div','.vclass .txt');
-  gsap.fromTo('.vclass .img img',{scale:1.15},{scale:1,ease:'none',scrollTrigger:{trigger:'.vclass',start:'top bottom',end:'bottom top',scrub:true}});
+  gsap.fromTo('.vclass .img img',{scale:1.18},{scale:1,ease:'none',scrollTrigger:{trigger:'.vclass',start:'top bottom',end:'bottom bottom',scrub:true}});
+  const vt=gsap.timeline({scrollTrigger:{trigger:'.vclass',start:'top 55%'}});
+  vt.from('.vclass h2',{y:60,opacity:0,filter:'blur(8px)',duration:1.2,ease:E})
+    .from('.vclass p',{y:30,opacity:0,duration:1,ease:E},'-=.8')
+    .from('.facts div',{y:24,opacity:0,duration:.9,stagger:.1,ease:E},'-=.7')
+    .from('.vclass .txt .btn',{y:20,opacity:0,duration:.8,ease:E},'-=.6');
   rise('.book h2, .book .lead','.book'); rise('.form > div','.form');
   gsap.from('footer .word',{y:40,opacity:0,duration:1.2,ease:E,scrollTrigger:{trigger:'footer',start:'top 85%'}});
 
