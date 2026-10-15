@@ -145,7 +145,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 .swipe{display:none;padding:14px var(--pad) 0;font-size:.9rem;color:#56645a}
 
 /* ---------- serviços ---------- */
-.services{background:var(--bone);color:var(--black);padding:clamp(80px,14vh,170px) var(--pad)}
+.services{background:var(--bone);color:var(--black);padding:clamp(80px,14vh,170px) var(--pad) clamp(30px,6vh,70px)}
 .services .wrap{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:clamp(30px,6vw,100px)}
 .services h2{font-size:clamp(2.4rem,1rem + 4.2vw,5rem);position:sticky;top:120px;align-self:start}
 .svc{list-style:none;padding:0}
@@ -164,6 +164,8 @@ button,input,select,textarea{font:inherit;color:inherit}
 /* ---------- classe V ---------- */
 .vclass{position:relative;min-height:100svh;display:flex;align-items:flex-end;background:var(--black);overflow:hidden;isolation:isolate}
 .vclass .img{position:absolute;inset:0;z-index:-2;background:var(--black)}
+.vclass .veil{position:absolute;inset:0;transform-origin:50% 0%;z-index:1;pointer-events:none;background:linear-gradient(180deg,var(--bone) 0%,var(--bone) 18%,rgba(236,232,220,.85) 38%,rgba(236,232,220,.4) 62%,rgba(236,232,220,0) 100%)}
+.no-js .vclass .veil{display:none}
 .vclass .img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 45%;filter:saturate(.85)}
 .vclass::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,rgba(7,9,8,.9) 0%,rgba(7,9,8,.62) 30%,rgba(7,9,8,0) 58%),linear-gradient(0deg,rgba(7,9,8,.6) 0%,rgba(7,9,8,0) 40%)}
 .vclass .txt{position:relative;width:min(100%,560px);padding:clamp(120px,30vh,320px) var(--pad) clamp(50px,8vh,90px);display:flex;flex-direction:column;justify-content:flex-end}
@@ -347,6 +349,7 @@ footer .credits a{text-decoration:underline}
 
   <!-- CLASSE V -->
   <section class="vclass" id="classe-v" aria-labelledby="v-h">
+    <div class="veil" aria-hidden="true"></div>
     <div class="img"><img src="https://images.unsplash.com/photo-1765461734605-34657fa04db2?auto=format&fit=crop&w=1800&q=70" alt="" loading="lazy" onerror="this.style.display='none'"></div>
     <div class="txt">
       <h2 class="display" id="v-h" data-i18n="vh">Uma sala de estar sobre rodas.</h2>
@@ -587,6 +590,7 @@ addEventListener('scroll',()=>nav.classList.toggle('solid', scrollY>innerHeight*
 
 /* ---------- Movimento ---------- */
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+if(reduce){ const v=document.querySelector('.vclass .veil'); if(v) v.style.display='none'; }
 if(window.gsap && !reduce){
   gsap.registerPlugin(ScrollTrigger);
   ScrollTrigger.config({ignoreMobileResize:true});
@@ -622,6 +626,8 @@ if(window.gsap && !reduce){
   const rise=(sel,trig)=>gsap.from(sel,{y:32,opacity:0,duration:1,stagger:.08,ease:E,scrollTrigger:{trigger:trig||sel,start:'top 82%'}});
   rise('.services h2','.services'); rise('.svc li','.svc');
   gsap.fromTo('.vclass .img img',{scale:1.18},{scale:1,ease:'none',scrollTrigger:{trigger:'.vclass',start:'top bottom',end:'bottom bottom',scrub:true}});
+  // transição: o bege dos serviços dissolve-se e a carrinha aparece por baixo
+  gsap.fromTo('.vclass .veil',{scaleY:1},{scaleY:0,ease:'none',transformOrigin:'50% 0%',scrollTrigger:{trigger:'.vclass',start:'top 100%',end:'top -5%',scrub:true}});
   // Classe V: o texto surge palavra a palavra ao ritmo do scroll
   const vh2=document.querySelector('.vclass h2');
   const splitV=()=>{ vh2.innerHTML = vh2.textContent.trim().split(/\s+/).map(w=>`<span class="w">${w}</span>`).join(' '); };
