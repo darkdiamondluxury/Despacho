@@ -41,7 +41,7 @@ button,input,select{font:inherit;color:inherit}
 
 /* ---------- navegação ---------- */
 .nav{position:fixed;inset:0 0 auto 0;z-index:50;display:flex;align-items:center;gap:28px;padding:18px var(--pad);transition:background .4s var(--ease-out),padding .4s var(--ease-out)}
-.nav.solid{background:var(--black);padding-block:12px}
+.nav.solid{background:var(--green);padding-block:12px}
 .brand{white-space:nowrap;display:flex;align-items:center;gap:10px;text-decoration:none;font-family:var(--display);font-size:1.3rem;letter-spacing:.01em}
 .brand .lux{color:var(--gold)}
 @media (max-width:520px){.brand{font-size:1.08rem;gap:8px}.brand svg{width:19px;height:19px}.lang button{padding:5px 9px}}
@@ -49,14 +49,14 @@ button,input,select{font:inherit;color:inherit}
 .nav .links{display:flex;gap:26px;margin-left:auto}
 .nav .links a{text-decoration:none;color:var(--muted);font-size:.95rem;transition:color .2s}
 .nav .links a:hover{color:var(--ink)}
-.lang{display:flex;gap:2px;background:var(--green-3);border-radius:99px;padding:3px}
+.lang{display:flex;gap:2px;background:var(--black);border-radius:99px;padding:3px}
 .lang button{border:0;background:none;border-radius:99px;padding:5px 11px;font-size:.82rem;cursor:pointer;color:var(--muted)}
 .lang button[aria-pressed="true"]{background:var(--ink);color:var(--green)}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;border:0;border-radius:99px;padding:15px 26px;background:var(--gold);color:var(--green);font-weight:600;font-size:1rem;text-decoration:none;cursor:pointer;transition:transform .16s var(--ease-out),background .2s}
 .btn:active{transform:scale(.97)}
 @media (hover:hover){.btn:hover{background:#d8c27c}}
-.btn.dark{background:var(--green);color:var(--bone)}
-@media (hover:hover){.btn.dark:hover{background:var(--black)}}
+.btn.dark{background:var(--black);color:var(--bone)}
+@media (hover:hover){.btn.dark:hover{background:var(--green)}}
 .btn.ghost{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1.5px rgba(238,234,223,.45)}
 .nav .btn{padding:10px 20px;font-size:.92rem}
 @media (max-width:860px){.nav .links{display:none}.nav{gap:12px}.nav .lang{margin-left:auto}}
@@ -66,7 +66,7 @@ button,input,select{font:inherit;color:inherit}
 .hero{position:relative;min-height:100svh;display:grid;align-items:end;padding:120px var(--pad) clamp(40px,7vh,80px);overflow:hidden;isolation:isolate}
 .hero .bg{position:absolute;inset:0;z-index:-2;background:var(--green-2)}
 .hero .bg img{width:100%;height:100%;object-fit:cover;object-position:60% 50%;filter:saturate(.75) contrast(1.05)}
-.hero::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(6,8,7,.7) 0%,rgba(6,8,7,.25) 38%,rgba(6,8,7,.94) 100%)}
+.hero::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(8,32,22,.6) 0%,rgba(8,32,22,.22) 38%,rgba(8,32,22,.94) 100%)}
 .hero-grid{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,.6fr);gap:clamp(24px,5vw,80px);align-items:end}
 .hero h1{font-size:clamp(3rem,1rem + 5.1vw,6.6rem)}
 .hero h1 .line>span{white-space:nowrap}
@@ -77,7 +77,7 @@ button,input,select{font:inherit;color:inherit}
 .hero .actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}
 
 /* placa de chegada: o elemento da marca */
-.board{background:var(--bone);color:var(--green);border-radius:4px;padding:26px 28px 22px;transform:rotate(-1.2deg);box-shadow:0 30px 60px -20px rgba(0,0,0,.55)}
+.board{background:var(--bone);color:var(--black);border-radius:4px;padding:26px 28px 22px;transform:rotate(-1.2deg);box-shadow:0 30px 60px -20px rgba(0,0,0,.55)}
 .board .greet{font-size:.95rem;color:#3b4a40}
 .board .name{font-family:var(--display);font-size:clamp(2rem,1.2rem + 2.6vw,3.4rem);line-height:1;letter-spacing:-.02em;margin-top:6px;min-height:1em;word-break:break-word}
 .board .name.empty,.bigboard .name.empty{opacity:.32}
@@ -111,7 +111,7 @@ button,input,select{font:inherit;color:inherit}
 @media (max-width:860px){.panel.field .bigboard{position:relative;right:auto;top:auto;translate:none;width:100%;margin-bottom:28px}.panel.field{align-content:end}.counter{display:none}}
 
 /* ---------- destinos (scroll horizontal) ---------- */
-.dest{position:relative;background:var(--bone);color:var(--green)}
+.dest{position:relative;background:var(--bone);color:var(--black)}
 .dest .pin{height:100svh;display:flex;flex-direction:column;justify-content:center;overflow:hidden}
 .dest .head{padding:0 var(--pad);display:flex;justify-content:space-between;align-items:end;gap:20px;flex-wrap:wrap}
 .dest h2{font-size:clamp(2.4rem,1rem + 4.6vw,5.4rem);max-width:12ch}
@@ -124,7 +124,7 @@ button,input,select{font:inherit;color:inherit}
 .track.drag{scroll-snap-type:none;scroll-behavior:auto;cursor:grabbing}
 .place{scroll-snap-align:start}
 .dest .arrows{display:flex;gap:10px}
-.dest .arrows button{width:56px;height:56px;border-radius:50%;border:0;background:var(--green);color:var(--bone);font-size:1.4rem;cursor:pointer;transition:transform .16s var(--ease-out),opacity .2s}
+.dest .arrows button{width:56px;height:56px;border-radius:50%;border:0;background:var(--black);color:var(--bone);font-size:1.4rem;cursor:pointer;transition:transform .16s var(--ease-out),opacity .2s}
 .dest .arrows button:active{transform:scale(.94)}
 .dest .arrows button:disabled{opacity:.25;cursor:default}
 @media (hover:hover) and (pointer:fine){.track{cursor:grab}}
@@ -135,7 +135,7 @@ button,input,select{font:inherit;color:inherit}
   .dest .arrows{display:none}
   .track{gap:44px}
 }
-.place{flex:none;background:none;border:0;padding:0;text-align:left;cursor:pointer;color:var(--green)}
+.place{flex:none;background:none;border:0;padding:0;text-align:left;cursor:pointer;color:var(--black)}
 .place .nm{font-family:var(--display);font-size:clamp(3.2rem,1rem + 8vw,9.5rem);line-height:.92;letter-spacing:-.035em;display:block;transition:color .25s}
 .place .tm{display:flex;align-items:center;gap:10px;margin-top:14px;font-size:1.05rem;color:#3e4c42;font-variant-numeric:tabular-nums}
 .place .tm b{font-weight:600;color:var(--green)}
@@ -146,26 +146,28 @@ button,input,select{font:inherit;color:inherit}
 .swipe{display:none;padding:14px var(--pad) 0;font-size:.9rem;color:#56645a}
 
 /* ---------- serviços ---------- */
-.services{background:var(--black);color:var(--ink);padding:clamp(80px,14vh,170px) var(--pad)}
+.services{background:var(--bone);color:var(--black);padding:clamp(80px,14vh,170px) var(--pad)}
 .services .wrap{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:clamp(30px,6vw,100px)}
 .services h2{font-size:clamp(2.4rem,1rem + 4.2vw,5rem);position:sticky;top:120px;align-self:start}
 .svc{list-style:none;padding:0}
 .svc li{padding:22px 0;display:grid;grid-template-columns:minmax(0,1fr);gap:6px}
 .svc li+li{margin-top:6px}
 .svc h3{font-family:var(--display);font-weight:400;font-size:clamp(1.8rem,1.2rem + 1.8vw,3rem);letter-spacing:-.02em;line-height:1.05}
-.svc p{color:#c9cbbd;max-width:46ch}
+.svc p{color:#2b302c;max-width:46ch}
 .svc li{grid-template-columns:minmax(0,1fr) auto;align-items:end;column-gap:24px;padding:28px 0}
 .svc li>div{display:grid;gap:8px}
-.svc h3{color:var(--ink);transition:color .25s}
-@media (hover:hover){.svc li:hover h3{color:var(--gold)}}
-.svc .mini{padding:11px 18px;font-size:.92rem;white-space:nowrap}
+.svc h3{color:var(--black);transition:color .25s}
+@media (hover:hover){.svc li:hover h3{color:var(--olive)}}
+.svc .mini{padding:12px 20px;font-size:.95rem;white-space:nowrap;background:var(--black);color:var(--bone)}
+@media (hover:hover){.svc .mini:hover{background:var(--green)}}
+.services h2{color:var(--black)}
 @media (max-width:560px){.svc li{grid-template-columns:1fr;row-gap:14px}.svc .mini{justify-self:start}}
 @media (max-width:860px){.services{padding-top:40px}.services .wrap{grid-template-columns:1fr}.services h2{position:static}}
 
 /* ---------- classe V ---------- */
 .vclass{position:relative;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);min-height:100svh;background:var(--green)}
 .vclass .img{position:relative;overflow:hidden;background:var(--green-2)}
-.vclass .img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:saturate(.7)}
+.vclass .img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:30% 55%;filter:saturate(.7)}
 .vclass .txt{padding:clamp(70px,12vh,140px) var(--pad);display:flex;flex-direction:column;justify-content:center}
 .vclass h2{font-size:clamp(2.6rem,1rem + 4.6vw,5.6rem);max-width:10ch}
 .vclass p{margin-top:22px;max-width:38ch;color:var(--ink);opacity:.9}
@@ -183,10 +185,11 @@ button,input,select{font:inherit;color:inherit}
 .form{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .form .full{grid-column:1/-1}
 .form label{display:block;font-size:.9rem;color:var(--muted);margin-bottom:7px}
-.form input,.form select{width:100%;background:var(--green-3);border:0;border-radius:12px;padding:15px 16px;font-size:1rem;color:var(--ink);appearance:none}
-.form input::placeholder{color:#7f8573}
+.form input,.form select,.form textarea{width:100%;background:var(--black);border:0;border-radius:12px;padding:15px 16px;font-size:1rem;color:var(--ink);appearance:none}
+.form input::placeholder,.form textarea::placeholder{color:#7f8573}
+.form textarea{border:0;border-radius:12px;padding:15px 16px;font-size:1rem;color:var(--ink);resize:vertical;min-height:96px}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
-.chips button{border:0;border-radius:99px;padding:10px 16px;background:var(--green-3);color:var(--ink);cursor:pointer;font-size:.95rem;transition:background .2s,color .2s,transform .16s var(--ease-out)}
+.chips button{border:0;border-radius:99px;padding:10px 16px;background:var(--black);color:var(--ink);cursor:pointer;font-size:.95rem;transition:background .2s,color .2s,transform .16s var(--ease-out)}
 .chips button:active{transform:scale(.97)}
 .chips button[aria-pressed="true"]{background:var(--ink);color:var(--green)}
 .form .btn{margin-top:10px}
@@ -194,7 +197,7 @@ button,input,select{font:inherit;color:inherit}
 @media (max-width:860px){.book .wrap{grid-template-columns:1fr}.form{grid-template-columns:1fr}}
 
 /* ---------- rodapé ---------- */
-footer{background:var(--black);padding:clamp(70px,12vh,130px) var(--pad) 40px;overflow:hidden}
+footer{background:var(--green);padding:clamp(70px,12vh,130px) var(--pad) 40px;overflow:hidden}
 footer .word{font-family:var(--display);font-size:clamp(2.8rem,10.5vw,12rem);line-height:.85;letter-spacing:-.045em;white-space:nowrap;color:var(--ink)}
 footer .word em{font-style:normal;color:var(--gold)}
 footer .foot-top{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:clamp(20px,4vw,60px)}
@@ -355,7 +358,7 @@ footer .cols{grid-template-columns:1fr}}
 
   <!-- CLASSE V -->
   <section class="vclass" id="classe-v" aria-labelledby="v-h">
-    <div class="img"><img src="https://images.unsplash.com/photo-1730800328198-f9efbf9db53f?auto=format&fit=crop&w=1800&q=70" alt="" loading="lazy" onerror="this.style.display='none'"></div>
+    <div class="img"><img src="https://images.unsplash.com/photo-1765461734605-34657fa04db2?auto=format&fit=crop&w=1800&q=70" alt="" loading="lazy" onerror="this.style.display='none'"></div>
     <div class="txt">
       <h2 class="display" id="v-h" data-i18n="vh">Uma sala de estar sobre rodas.</h2>
       <p data-i18n="vp">A Mercedes-Benz Classe V é o centro da nossa frota: espaço para o grupo e para as malas, bancos frente a frente e um interior pensado para conversar ou descansar.</p>
@@ -380,12 +383,20 @@ footer .cols{grid-template-columns:1fr}}
           <label data-i18n="l_svc">Serviço</label>
           <div class="chips" id="svcChips" role="group"></div>
         </div>
-        <div class="full"><label for="fTo" data-i18n="l_to">Destino</label><input id="fTo" data-i18n-ph="ph_to" placeholder="Hotel, morada ou cidade"></div>
+        <div class="full" id="dirWrap">
+          <label data-i18n="l_dir">Sentido</label>
+          <div class="chips" id="dirChips" role="group"></div>
+        </div>
+        <div><label for="fFrom" data-i18n="l_from">Recolha</label><input id="fFrom" data-i18n-ph="ph_from" placeholder="Aeroporto de Lisboa"></div>
+        <div><label for="fTo" data-i18n="l_to">Destino</label><input id="fTo" data-i18n-ph="ph_to" placeholder="Hotel, morada ou cidade"></div>
         <div><label for="fDate" data-i18n="l_date">Data</label><input id="fDate" type="date"></div>
         <div><label for="fTime" data-i18n="l_time">Hora</label><input id="fTime" type="time"></div>
         <div><label for="fPax" data-i18n="l_pax">Passageiros</label><input id="fPax" type="number" min="1" max="20" inputmode="numeric" value="2"></div>
         <div><label for="fFlight" data-i18n="l_flight">Voo (opcional)</label><input id="fFlight" placeholder="TP1234" autocapitalize="characters"></div>
+        <div><label for="fBags" data-i18n="l_bags">Malas de porão</label><input id="fBags" type="number" min="0" max="30" inputmode="numeric" value="2"></div>
+        <div><label for="fCabin" data-i18n="l_cabin">Bagagem de mão</label><input id="fCabin" type="number" min="0" max="30" inputmode="numeric" value="1"></div>
         <div class="full"><label for="fName" data-i18n="l_name">Nome</label><input id="fName" autocomplete="name"></div>
+        <div class="full"><label for="fNotes" data-i18n="l_notes">Notas (opcional)</label><textarea id="fNotes" rows="3" data-i18n-ph="ph_notes" placeholder="Cadeira de criança, paragem pelo caminho, pedidos especiais…"></textarea></div>
         <div class="full">
           <button class="btn" type="submit" data-i18n="send">Enviar pelo WhatsApp</button>
           <p class="hint" id="hint" data-i18n="hint">Abre o WhatsApp com a mensagem pronta. Não guardamos nada neste site.</p>
@@ -409,8 +420,7 @@ footer .cols{grid-template-columns:1fr}}
     <a href="https://unsplash.com/photos/PNW4oeltJGo">William G</a>,
     <a href="https://unsplash.com/photos/yydI2Op7ILs">Iler Stoe</a>,
     <a href="https://unsplash.com/photos/oe4QHK9EwS8">Luis Quintero</a>,
-    <a href="https://unsplash.com/photos/gOLCAOuc7iA">Svetlana Gumerova</a>,
-    <a href="https://unsplash.com/photos/-eUrpy0fjXE">Antonio Araujo</a>.
+    <a href="https://unsplash.com/photos/gOLCAOuc7iA">Svetlana Gumerova</a>.
     © <span id="yr"></span> Dark Diamond Luxury.</p>
 </footer>
 
@@ -441,12 +451,12 @@ const T = {
     vh:'Uma sala de estar sobre rodas.',vp:'A Mercedes-Benz Classe V é o centro da nossa frota: espaço para o grupo e para as malas, bancos frente a frente e um interior pensado para conversar ou descansar.',
     f1b:'Grupos',f1s:'famílias e equipas juntas',f2b:'Bagagem',f2s:'malas de porão incluídas',f3s:'a qualquer hora do voo',
     bh:'Reserve em segundos.',bp:'Diga-nos o essencial. Respondemos no WhatsApp com a confirmação e o preço.',
-    l_svc:'Serviço',l_to:'Destino',ph_to:'Hotel, morada ou cidade',l_date:'Data',l_time:'Hora',l_pax:'Passageiros',l_flight:'Voo (opcional)',l_name:'Nome',
+    l_svc:'Serviço',l_to:'Destino',ph_to:'Hotel, morada ou cidade',l_dir:'Sentido',l_from:'Recolha',ph_from:'Aeroporto de Lisboa',l_bags:'Malas de porão',l_cabin:'Bagagem de mão',l_notes:'Notas (opcional)',ph_notes:'Cadeira de criança, paragem pelo caminho, pedidos especiais…',dirs:['Do aeroporto','Para o aeroporto','Outro trajeto'],airport:'Aeroporto de Lisboa',l_date:'Data',l_time:'Hora',l_pax:'Passageiros',l_flight:'Voo (opcional)',l_name:'Nome',
     send:'Enviar pelo WhatsApp',hint:'Abre o WhatsApp com a mensagem pronta. Não guardamos nada neste site.',
     nowa:'O número de WhatsApp ainda não está definido neste site.',
     c_contact:'Contacto',top:'Voltar ao início',c_company:'Empresa',c_legal:'Informação',c_priv:'Privacidade',c_sup:'Suporte da app',credits:'Fotografias ilustrativas, Unsplash License:',
     svcs:['Aeroporto','À disposição','Tour','Evento','Longa distância'],from:'desde o aeroporto',
-    msg:(d)=>`Olá! Gostaria de reservar.\nServiço: ${d.svc}\nDestino: ${d.to}\nData: ${d.date} ${d.time}\nPassageiros: ${d.pax}${d.flight?`\nVoo: ${d.flight}`:''}\nNome: ${d.name}`},
+    msg:(d)=>`Olá! Gostaria de reservar.\nServiço: ${d.svc}\nRecolha: ${d.from}\nDestino: ${d.to}\nData: ${d.date} ${d.time}\nPassageiros: ${d.pax}\nMalas: ${d.bags} de porão, ${d.cabin} de mão${d.flight?`\nVoo: ${d.flight}`:''}\nNome: ${d.name}${d.notes?`\nNotas: ${d.notes}`:''}`},
   en:{nav_exp:'Experience',nav_dest:'Destinations',nav_svc:'Services',nav_fleet:'V-Class',cta_short:'Book',
     h1a:'Lisbon greets you',h1b:'by name.',sub:'Private transfers and chauffeurs at your disposal, in Lisbon and across Portugal.',
     cta:'Book a transfer',cta2:'See the experience',welcome:'Welcome to Lisbon',try:'Type your name: this is how we will greet you',yourname:'Your name',try_ph:'Your name',
@@ -464,17 +474,17 @@ const T = {
     vh:'A living room on wheels.',vp:'The Mercedes-Benz V-Class is the heart of our fleet: room for the group and the luggage, facing seats and a cabin made for talking or resting.',
     f1b:'Groups',f1s:'families and teams together',f2b:'Luggage',f2s:'checked bags included',f3s:'whatever time you land',
     bh:'Book in seconds.',bp:'Tell us the essentials. We reply on WhatsApp with confirmation and price.',
-    l_svc:'Service',l_to:'Destination',ph_to:'Hotel, address or city',l_date:'Date',l_time:'Time',l_pax:'Passengers',l_flight:'Flight (optional)',l_name:'Name',
+    l_svc:'Service',l_to:'Destination',ph_to:'Hotel, address or city',l_dir:'Direction',l_from:'Pick-up',ph_from:'Lisbon Airport',l_bags:'Checked bags',l_cabin:'Carry-on',l_notes:'Notes (optional)',ph_notes:'Child seat, a stop on the way, special requests…',dirs:['From the airport','To the airport','Other route'],airport:'Lisbon Airport',l_date:'Date',l_time:'Time',l_pax:'Passengers',l_flight:'Flight (optional)',l_name:'Name',
     send:'Send via WhatsApp',hint:'Opens WhatsApp with the message ready. Nothing is stored on this site.',
     nowa:'The WhatsApp number is not set on this site yet.',
     c_contact:'Contact',top:'Back to top',c_company:'Company',c_legal:'Information',c_priv:'Privacy',c_sup:'App support',credits:'Illustrative photographs, Unsplash License:',
     svcs:['Airport','At disposal','Tour','Event','Long distance'],from:'from the airport',
-    msg:(d)=>`Hello! I'd like to book.\nService: ${d.svc}\nDestination: ${d.to}\nDate: ${d.date} ${d.time}\nPassengers: ${d.pax}${d.flight?`\nFlight: ${d.flight}`:''}\nName: ${d.name}`}
+    msg:(d)=>`Hello! I'd like to book.\nService: ${d.svc}\nPick-up: ${d.from}\nDestination: ${d.to}\nDate: ${d.date} ${d.time}\nPassengers: ${d.pax}\nLuggage: ${d.bags} checked, ${d.cabin} carry-on${d.flight?`\nFlight: ${d.flight}`:''}\nName: ${d.name}${d.notes?`\nNotes: ${d.notes}`:''}`}
 };
 const PLACES = [['Baixa · Chiado','20 min'],['Cascais','35 min'],['Sintra','35 min'],['Comporta','1h15'],['Évora','1h30'],['Fátima','1h30'],['Algarve','2h45'],['Porto','3h']];
 
 let lang = (()=>{ try{ const s=localStorage.getItem('dd-lang'); if(s) return s; }catch(e){} return (navigator.language||'pt').toLowerCase().startsWith('pt')?'pt':'en'; })();
-let svcPick = 0;
+let svcPick = 0, dirPick = 0;
 
 function render(){
   const t = T[lang];
@@ -484,12 +494,27 @@ function render(){
   document.querySelectorAll('.lang button').forEach(b=>b.setAttribute('aria-pressed', b.dataset.lang===lang));
   const tr = document.getElementById('track');
   tr.innerHTML = PLACES.map(([n,m],i)=>`<button class="place" type="button" data-i="${i}"><span class="nm">${n}</span><span class="tm"><b>≈ ${m}</b> ${t.from}</span><span class="go">${t.go}</span></button>`).join('');
+  const dc = document.getElementById('dirChips');
+  dc.innerHTML = t.dirs.map((s,i)=>`<button type="button" aria-pressed="${i===dirPick}" data-i="${i}">${s}</button>`).join('');
+  applyDir(false);
   const ch = document.getElementById('svcChips');
   ch.innerHTML = t.svcs.map((s,i)=>`<button type="button" aria-pressed="${i===svcPick}" data-i="${i}">${s}</button>`).join('');
   if(!document.getElementById('nameIn').value.trim()) document.querySelectorAll('.js-name').forEach(n=>{n.textContent = t.yourname; n.classList.add('empty');});
   document.title = lang==='pt' ? 'Dark Diamond Luxury — Transfers privados em Lisboa' : 'Dark Diamond Luxury — Private transfers in Lisbon';
 }
+function applyDir(user){
+  const t=T[lang], f=document.getElementById('fFrom'), to=document.getElementById('fTo');
+  const isAir=v=>!v||v===T.pt.airport||v===T.en.airport;
+  if(dirPick===0){ if(isAir(f.value)) f.value=t.airport; if(isAir(to.value)) to.value=''; }
+  else if(dirPick===1){ if(isAir(to.value)) to.value=t.airport; if(isAir(f.value)) f.value=''; }
+  else if(user){ if(isAir(f.value)) f.value=''; if(isAir(to.value)) to.value=''; }
+  document.getElementById('svcWrap')?.classList.toggle('x',false);
+}
 render();
+document.getElementById('dirChips').addEventListener('click', e=>{
+  const b=e.target.closest('button'); if(!b) return; dirPick=+b.dataset.i;
+  document.querySelectorAll('#dirChips button').forEach(x=>x.setAttribute('aria-pressed', x===b)); applyDir(true);
+});
 document.getElementById('yr').textContent = new Date().getFullYear();
 
 document.querySelector('.lang').addEventListener('click', e=>{
@@ -523,7 +548,7 @@ document.getElementById('svcChips').addEventListener('click', e=>{
 document.getElementById('form').addEventListener('submit', e=>{
   e.preventDefault();
   const t=T[lang], g=id=>document.getElementById(id).value.trim();
-  const d={svc:t.svcs[svcPick],to:g('fTo')||'—',date:g('fDate')||'—',time:g('fTime'),pax:g('fPax')||'—',flight:g('fFlight'),name:g('fName')||'—'};
+  const d={svc:t.svcs[svcPick],from:g('fFrom')||'—',bags:g('fBags')||'0',cabin:g('fCabin')||'0',notes:g('fNotes'),to:g('fTo')||'—',date:g('fDate')||'—',time:g('fTime'),pax:g('fPax')||'—',flight:g('fFlight'),name:g('fName')||'—'};
   if(!WHATSAPP){ const h=document.getElementById('hint'); h.textContent=t.nowa; h.style.color='var(--gold)'; return; }
   window.open(`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(t.msg(d))}`,'_blank','noopener');
 });
@@ -555,12 +580,12 @@ document.querySelectorAll('a[href^="#"]').forEach(a=>a.addEventListener('click',
 (()=>{
   // aparece depois do topo; esconde-se onde a secção já tem os seus botões (serviços, reserva, rodapé)
   const f=document.getElementById('floatCta'), seen=new Map();
-  const hide=['reservar','servicos'];
+  const hide=['form'];
   const io=new IntersectionObserver(es=>{es.forEach(e=>seen.set(e.target,e.isIntersecting));
     const heroOut=!seen.get(document.querySelector('.hero'));
     const busy=[...seen].some(([el,v])=>v && el!==document.querySelector('.hero'));
     f.classList.toggle('on', heroOut && !busy);},{threshold:0});
-  io.observe(document.querySelector('.hero')); hide.forEach(id=>io.observe(document.getElementById(id))); io.observe(document.querySelector('footer'));
+  io.observe(document.querySelector('.hero')); hide.forEach(id=>io.observe(document.getElementById(id)));
 })();
 document.querySelectorAll('[data-svc]').forEach(a=>a.addEventListener('click',()=>{
   svcPick=+a.dataset.svc; document.querySelectorAll('#svcChips button').forEach((x,i)=>x.setAttribute('aria-pressed', i===svcPick));
