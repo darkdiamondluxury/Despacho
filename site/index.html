@@ -165,15 +165,16 @@ button,input,select,textarea{font:inherit;color:inherit}
 .vclass{position:relative;min-height:100svh;display:flex;align-items:flex-end;background:var(--black);overflow:hidden;isolation:isolate}
 .vclass .img{position:absolute;inset:0;z-index:-2;background:var(--black)}
 .vclass .img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 45%;filter:saturate(.85)}
-.vclass::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(0deg,rgba(7,9,8,.94) 0%,rgba(7,9,8,.7) 38%,rgba(7,9,8,.15) 70%,rgba(7,9,8,.35) 100%)}
-.vclass .txt{position:relative;width:100%;padding:clamp(120px,30vh,320px) var(--pad) clamp(60px,10vh,110px);display:flex;flex-direction:column;justify-content:flex-end}
-.vclass h2{font-size:clamp(2.6rem,1rem + 4.6vw,5.6rem);max-width:12ch}
-.vclass p{margin-top:22px;max-width:40ch;color:var(--ink);opacity:.92}
-.facts{display:flex;flex-wrap:wrap;gap:34px;margin-top:40px}
+.vclass::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,rgba(7,9,8,.9) 0%,rgba(7,9,8,.62) 30%,rgba(7,9,8,0) 58%),linear-gradient(0deg,rgba(7,9,8,.6) 0%,rgba(7,9,8,0) 40%)}
+.vclass .txt{position:relative;width:min(100%,560px);padding:clamp(120px,30vh,320px) var(--pad) clamp(50px,8vh,90px);display:flex;flex-direction:column;justify-content:flex-end}
+.vclass h2{font-size:clamp(2.4rem,1rem + 3.4vw,4.4rem);max-width:10ch}
+.vclass h2 .w{display:inline-block;will-change:transform,opacity}
+.vclass p{margin-top:20px;max-width:34ch;color:var(--ink);opacity:.92}
+.facts{display:flex;flex-wrap:wrap;gap:22px 30px;margin-top:32px}
 .facts div{min-width:120px}
 .facts b{display:block;font-family:var(--display);font-weight:300;font-size:clamp(1.6rem,1rem + 1.6vw,2.4rem);color:var(--gold);letter-spacing:-.01em;line-height:1}
 .facts span{display:block;margin-top:6px;color:var(--muted);font-size:.95rem}
-@media (max-width:860px){.vclass .img img{object-position:40% 40%}.vclass::after{background:linear-gradient(0deg,rgba(7,9,8,.96) 0%,rgba(7,9,8,.8) 45%,rgba(7,9,8,.2) 75%,rgba(7,9,8,.4) 100%)}}
+@media (max-width:860px){.vclass .img img{object-position:62% 35%}.vclass::after{background:linear-gradient(0deg,rgba(7,9,8,.95) 0%,rgba(7,9,8,.72) 42%,rgba(7,9,8,0) 68%)}.vclass .txt{width:100%;padding-top:42svh}}
 
 /* ---------- reserva ---------- */
 .book{background:var(--green-2);padding:clamp(80px,14vh,170px) var(--pad)}
@@ -508,7 +509,8 @@ document.getElementById('yr').textContent = new Date().getFullYear();
 document.querySelector('.lang').addEventListener('click', e=>{
   const b=e.target.closest('button'); if(!b) return;
   lang=b.dataset.lang; try{localStorage.setItem('dd-lang',lang)}catch(e){}
-  render(); if(window.ScrollTrigger) ScrollTrigger.refresh();
+  render(); if(window.__splitV){ window.__splitV(); }
+  if(window.ScrollTrigger) ScrollTrigger.refresh();
 });
 
 /* placa com o nome */
@@ -620,11 +622,16 @@ if(window.gsap && !reduce){
   const rise=(sel,trig)=>gsap.from(sel,{y:32,opacity:0,duration:1,stagger:.08,ease:E,scrollTrigger:{trigger:trig||sel,start:'top 82%'}});
   rise('.services h2','.services'); rise('.svc li','.svc');
   gsap.fromTo('.vclass .img img',{scale:1.18},{scale:1,ease:'none',scrollTrigger:{trigger:'.vclass',start:'top bottom',end:'bottom bottom',scrub:true}});
-  const vt=gsap.timeline({scrollTrigger:{trigger:'.vclass',start:'top 55%'}});
-  vt.from('.vclass h2',{y:60,opacity:0,filter:'blur(8px)',duration:1.2,ease:E})
-    .from('.vclass p',{y:30,opacity:0,duration:1,ease:E},'-=.8')
-    .from('.facts div',{y:24,opacity:0,duration:.9,stagger:.1,ease:E},'-=.7')
-    .from('.vclass .txt .btn',{y:20,opacity:0,duration:.8,ease:E},'-=.6');
+  // Classe V: o texto surge palavra a palavra ao ritmo do scroll
+  const vh2=document.querySelector('.vclass h2');
+  const splitV=()=>{ vh2.innerHTML = vh2.textContent.trim().split(/\s+/).map(w=>`<span class="w">${w}</span>`).join(' '); };
+  splitV();
+  const vt=gsap.timeline({scrollTrigger:{trigger:'.vclass .txt',start:'top 95%',end:'bottom 70%',scrub:.8}});
+  vt.from('.vclass h2 .w',{yPercent:70,opacity:0,filter:'blur(6px)',stagger:.12,duration:.6,ease:'power2.out'})
+    .from('.vclass p',{y:30,opacity:0,duration:.6},'-=.2')
+    .from('.facts div',{y:24,opacity:0,stagger:.15,duration:.5},'-=.2')
+    .from('.vclass .txt .btn',{y:20,opacity:0,duration:.4},'-=.1');
+  window.__splitV=splitV;
   rise('.book h2, .book .lead','.book'); rise('.form > div','.form');
   gsap.from('footer .word',{y:40,opacity:0,duration:1.2,ease:E,scrollTrigger:{trigger:'footer',start:'top 85%'}});
 
