@@ -164,8 +164,6 @@ button,input,select,textarea{font:inherit;color:inherit}
 /* ---------- classe V ---------- */
 .vclass{position:relative;min-height:100svh;display:flex;align-items:flex-end;background:var(--black);overflow:hidden;isolation:isolate}
 .vclass .img{position:absolute;inset:0;z-index:-2;background:var(--black)}
-.vclass .veil{position:absolute;inset:0;transform-origin:50% 0%;z-index:1;pointer-events:none;background:linear-gradient(180deg,var(--bone) 0%,var(--bone) 18%,rgba(236,232,220,.85) 38%,rgba(236,232,220,.4) 62%,rgba(236,232,220,0) 100%)}
-.no-js .vclass .veil{display:none}
 .vclass .img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 45%;filter:saturate(.85)}
 .vclass::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,rgba(7,9,8,.9) 0%,rgba(7,9,8,.62) 30%,rgba(7,9,8,0) 58%),linear-gradient(0deg,rgba(7,9,8,.6) 0%,rgba(7,9,8,0) 40%)}
 .vclass .txt{position:relative;width:min(100%,560px);padding:clamp(120px,30vh,320px) var(--pad) clamp(50px,8vh,90px);display:flex;flex-direction:column;justify-content:flex-end}
@@ -213,9 +211,17 @@ footer .credits{margin-top:44px;font-size:.82rem;color:#7f8573;max-width:110ch}
 footer .credits a{text-decoration:underline}
 @media (max-width:860px){footer .foot-top{grid-template-columns:1fr}.totop{justify-self:start}footer .cols{grid-template-columns:1fr}}
 
+/* transição entre ecrãs: a cor do ecrã anterior prolonga-se e dissolve-se com o scroll */
+.veil{position:absolute;left:0;right:0;top:0;height:min(100%,110svh);z-index:5;pointer-events:none;transform-origin:50% 0%;
+  background:linear-gradient(180deg,var(--vc) 0%,var(--vc) 18%,color-mix(in srgb,var(--vc) 85%,transparent) 38%,color-mix(in srgb,var(--vc) 40%,transparent) 62%,transparent 100%)}
+.book,footer{position:relative}
 .float-cta{position:fixed;z-index:60;right:var(--pad);bottom:calc(18px + env(safe-area-inset-bottom));box-shadow:0 14px 34px -10px rgba(0,0,0,.55);opacity:0;transform:translateY(16px);pointer-events:none;transition:opacity .3s var(--ease-out),transform .3s var(--ease-out),background .2s}
 .float-cta.on{opacity:1;transform:none;pointer-events:auto}
-@media (max-width:860px),(hover:none){.float-cta{display:none!important}}
+@media (max-width:860px),(hover:none){/* transição entre ecrãs: a cor do ecrã anterior prolonga-se e dissolve-se com o scroll */
+.veil{position:absolute;left:0;right:0;top:0;height:min(100%,110svh);z-index:5;pointer-events:none;transform-origin:50% 0%;
+  background:linear-gradient(180deg,var(--vc) 0%,var(--vc) 18%,color-mix(in srgb,var(--vc) 85%,transparent) 38%,color-mix(in srgb,var(--vc) 40%,transparent) 62%,transparent 100%)}
+.book,footer{position:relative}
+.float-cta{display:none!important}}
 
 /* placeholders visíveis para preencher */
 .todo{color:var(--gold)}
@@ -349,7 +355,6 @@ footer .credits a{text-decoration:underline}
 
   <!-- CLASSE V -->
   <section class="vclass" id="classe-v" aria-labelledby="v-h">
-    <div class="veil" aria-hidden="true"></div>
     <div class="img"><img src="https://images.unsplash.com/photo-1765461734605-34657fa04db2?auto=format&fit=crop&w=1800&q=70" alt="" loading="lazy" onerror="this.style.display='none'"></div>
     <div class="txt">
       <h2 class="display" id="v-h" data-i18n="vh">Uma sala de estar sobre rodas.</h2>
@@ -590,7 +595,6 @@ addEventListener('scroll',()=>nav.classList.toggle('solid', scrollY>innerHeight*
 
 /* ---------- Movimento ---------- */
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-if(reduce){ const v=document.querySelector('.vclass .veil'); if(v) v.style.display='none'; }
 if(window.gsap && !reduce){
   gsap.registerPlugin(ScrollTrigger);
   ScrollTrigger.config({ignoreMobileResize:true});
@@ -626,8 +630,13 @@ if(window.gsap && !reduce){
   const rise=(sel,trig)=>gsap.from(sel,{y:32,opacity:0,duration:1,stagger:.08,ease:E,scrollTrigger:{trigger:trig||sel,start:'top 82%'}});
   rise('.services h2','.services'); rise('.svc li','.svc');
   gsap.fromTo('.vclass .img img',{scale:1.18},{scale:1,ease:'none',scrollTrigger:{trigger:'.vclass',start:'top bottom',end:'bottom bottom',scrub:true}});
-  // transição: o bege dos serviços dissolve-se e a carrinha aparece por baixo
-  gsap.fromTo('.vclass .veil',{scaleY:1},{scaleY:0,ease:'none',transformOrigin:'50% 0%',scrollTrigger:{trigger:'.vclass',start:'top 100%',end:'top -5%',scrub:true}});
+  // transições em fade entre todos os ecrãs: [secção que entra, cor do fundo do ecrã anterior]
+  [['.story','#0a1f16'],['.dest','#09201a'],['.vclass','#ECE8DC'],['.book','#08090a'],['footer','#0d2a1e']].forEach(([sel,col])=>{
+    const sec=document.querySelector(sel); if(!sec) return;
+    const v=document.createElement('div'); v.className='veil'; v.setAttribute('aria-hidden','true'); v.style.setProperty('--vc',col);
+    sec.prepend(v);
+    gsap.fromTo(v,{scaleY:1},{scaleY:0,ease:'none',scrollTrigger:{trigger:sec,start:'top 100%',end:'top -5%',scrub:true}});
+  });
   // Classe V: o texto surge palavra a palavra ao ritmo do scroll
   const vh2=document.querySelector('.vclass h2');
   const splitV=()=>{ vh2.innerHTML = vh2.textContent.trim().split(/\s+/).map(w=>`<span class="w">${w}</span>`).join(' '); };
