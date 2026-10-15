@@ -175,16 +175,30 @@ button,input,select{font:inherit;color:inherit}
 
 /* ---------- rodapé ---------- */
 footer{background:var(--green);padding:clamp(70px,12vh,130px) var(--pad) 40px;overflow:hidden}
-footer .word{font-family:var(--display);font-size:clamp(2.8rem,13.2vw,14rem);line-height:.85;letter-spacing:-.045em;white-space:nowrap;color:var(--ink)}
+footer .word{font-family:var(--display);font-size:clamp(2.8rem,10.5vw,12rem);line-height:.85;letter-spacing:-.045em;white-space:nowrap;color:var(--ink)}
 footer .word em{font-style:normal;color:var(--gold)}
-footer .totop{margin-top:40px}
+footer .foot-top{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:clamp(20px,4vw,60px)}
+footer .word{pointer-events:none;user-select:none}
+.totop{position:relative;z-index:2;display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;width:clamp(150px,13vw,190px);aspect-ratio:1;border:0;border-radius:50%;background:var(--gold);color:var(--green);font:600 1.02rem/1.2 var(--text);text-align:center;padding:18px;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;transition:transform .16s var(--ease-out),background .2s}
+.totop *{pointer-events:none}
+.totop .arr{font-size:1.9rem;line-height:1}
+.totop:active{transform:scale(.96)}
+@media (hover:hover){.totop:hover{background:#d8c27c}}
+@media (max-width:860px){footer .foot-top{grid-template-columns:1fr}.totop{width:auto;aspect-ratio:auto;flex-direction:row;border-radius:99px;padding:18px 28px;justify-self:start;font-size:1.05rem}.totop .arr{font-size:1.3rem}}
 footer .cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:30px;margin-top:56px;font-size:.95rem;color:var(--muted)}
 footer .cols b{display:block;color:var(--ink);font-weight:500;margin-bottom:8px}
 footer .cols a{display:block;text-decoration:none;margin-bottom:4px}
 footer .cols a:hover{color:var(--ink)}
 footer .credits{margin-top:44px;font-size:.82rem;color:#7f8573;max-width:110ch}
 footer .credits a{text-decoration:underline}
-@media (max-width:860px){footer .totop{margin-top:40px}
+@media (max-width:860px){footer .foot-top{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:clamp(20px,4vw,60px)}
+footer .word{pointer-events:none;user-select:none}
+.totop{position:relative;z-index:2;display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;width:clamp(150px,13vw,190px);aspect-ratio:1;border:0;border-radius:50%;background:var(--gold);color:var(--green);font:600 1.02rem/1.2 var(--text);text-align:center;padding:18px;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;transition:transform .16s var(--ease-out),background .2s}
+.totop *{pointer-events:none}
+.totop .arr{font-size:1.9rem;line-height:1}
+.totop:active{transform:scale(.96)}
+@media (hover:hover){.totop:hover{background:#d8c27c}}
+@media (max-width:860px){footer .foot-top{grid-template-columns:1fr}.totop{width:auto;aspect-ratio:auto;flex-direction:row;border-radius:99px;padding:18px 28px;justify-self:start;font-size:1.05rem}.totop .arr{font-size:1.3rem}}
 footer .cols{grid-template-columns:1fr}}
 
 /* placeholders visíveis para preencher */
@@ -355,8 +369,10 @@ footer .cols{grid-template-columns:1fr}}
 </main>
 
 <footer>
-  <div class="word">Dark Diamond<br><em>Luxury</em></div>
-  <button class="btn ghost totop" type="button" id="toTop" data-i18n="top">Voltar ao início ↑</button>
+  <div class="foot-top">
+    <div class="word">Dark Diamond<br><em>Luxury</em></div>
+    <button class="totop" type="button" id="toTop"><span class="arr" aria-hidden="true">↑</span><span data-i18n="top">Voltar ao início</span></button>
+  </div>
   <div class="cols">
     <div><b data-i18n="c_contact">Contacto</b><a href="#" id="waLink">WhatsApp <span class="todo">[número]</span></a><a href="#" class="todo">[email]</a><a href="#" class="todo">[Instagram]</a></div>
     <div><b data-i18n="c_company">Empresa</b><span class="todo">[Nome legal] · NIPC [—]</span><br><span class="todo">[Morada]</span><br><span class="todo">RNAAT [—]</span></div>
@@ -401,7 +417,7 @@ const T = {
     l_svc:'Serviço',l_to:'Destino',ph_to:'Hotel, morada ou cidade',l_date:'Data',l_time:'Hora',l_pax:'Passageiros',l_flight:'Voo (opcional)',l_name:'Nome',
     send:'Enviar pelo WhatsApp',hint:'Abre o WhatsApp com a mensagem pronta. Não guardamos nada neste site.',
     nowa:'O número de WhatsApp ainda não está definido neste site.',
-    c_contact:'Contacto',top:'Voltar ao início ↑',c_company:'Empresa',c_legal:'Informação',c_priv:'Privacidade',c_sup:'Suporte da app',credits:'Fotografias ilustrativas, Unsplash License:',
+    c_contact:'Contacto',top:'Voltar ao início',c_company:'Empresa',c_legal:'Informação',c_priv:'Privacidade',c_sup:'Suporte da app',credits:'Fotografias ilustrativas, Unsplash License:',
     svcs:['Aeroporto','À disposição','Tour','Evento','Longa distância'],from:'desde o aeroporto',
     msg:(d)=>`Olá! Gostaria de reservar.\nServiço: ${d.svc}\nDestino: ${d.to}\nData: ${d.date} ${d.time}\nPassageiros: ${d.pax}${d.flight?`\nVoo: ${d.flight}`:''}\nNome: ${d.name}`},
   en:{nav_exp:'Experience',nav_dest:'Destinations',nav_svc:'Services',nav_fleet:'V-Class',cta_short:'Book',
@@ -424,7 +440,7 @@ const T = {
     l_svc:'Service',l_to:'Destination',ph_to:'Hotel, address or city',l_date:'Date',l_time:'Time',l_pax:'Passengers',l_flight:'Flight (optional)',l_name:'Name',
     send:'Send via WhatsApp',hint:'Opens WhatsApp with the message ready. Nothing is stored on this site.',
     nowa:'The WhatsApp number is not set on this site yet.',
-    c_contact:'Contact',top:'Back to top ↑',c_company:'Company',c_legal:'Information',c_priv:'Privacy',c_sup:'App support',credits:'Illustrative photographs, Unsplash License:',
+    c_contact:'Contact',top:'Back to top',c_company:'Company',c_legal:'Information',c_priv:'Privacy',c_sup:'App support',credits:'Illustrative photographs, Unsplash License:',
     svcs:['Airport','At disposal','Tour','Event','Long distance'],from:'from the airport',
     msg:(d)=>`Hello! I'd like to book.\nService: ${d.svc}\nDestination: ${d.to}\nDate: ${d.date} ${d.time}\nPassengers: ${d.pax}${d.flight?`\nFlight: ${d.flight}`:''}\nName: ${d.name}`}
 };
@@ -546,7 +562,7 @@ if(window.gsap && !reduce){
   rise('.vclass h2, .vclass p, .facts div','.vclass .txt');
   gsap.fromTo('.vclass .img img',{scale:1.15},{scale:1,ease:'none',scrollTrigger:{trigger:'.vclass',start:'top bottom',end:'bottom top',scrub:true}});
   rise('.book h2, .book .lead','.book'); rise('.form > div','.form');
-  gsap.from('footer .word',{xPercent:-8,opacity:0,duration:1.4,ease:E,scrollTrigger:{trigger:'footer',start:'top 85%'}});
+  gsap.from('footer .word',{y:40,opacity:0,duration:1.2,ease:E,scrollTrigger:{trigger:'footer',start:'top 85%'}});
 
   addEventListener('load',()=>ScrollTrigger.refresh());
 }
