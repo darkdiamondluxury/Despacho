@@ -129,7 +129,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 @media (hover:hover) and (pointer:fine){.track{cursor:grab}}
 @media (max-width:860px),(hover:none){
   .dest .place .nm{font-size:clamp(2.5rem,12vw,4.2rem)}
-  .dest .place .go{opacity:1;transform:none}
+  .dest .place .go{display:inline-flex;align-items:center;margin-top:16px;padding:12px 22px;border-radius:99px;background:var(--black);color:var(--gold);font-size:.96rem;font-weight:500;transition:background .2s,color .2s,transform .16s var(--ease-out)}
   .dest p.swipe{display:block}
   .dest .arrows{display:none}
   .track{gap:44px}
@@ -139,8 +139,9 @@ button,input,select,textarea{font:inherit;color:inherit}
 .place .tm{display:flex;align-items:center;gap:10px;margin-top:14px;font-size:1.05rem;color:#3e4c42;font-variant-numeric:tabular-nums}
 .place .tm b{font-weight:500;color:var(--black)}
 .place .go{display:inline-block;margin-top:10px;font-size:.95rem;color:#9a7f35;font-weight:600;opacity:0;transform:translateY(6px);transition:opacity .25s var(--ease-out),transform .25s var(--ease-out)}
-@media (hover:hover){.place:hover .nm{color:#9a7f35}.place:hover .go{opacity:1;transform:none}}
-.place:focus-visible .go{opacity:1;transform:none}
+@media (hover:hover){.place:hover .nm{color:#9a7f35}.place:hover .go{background:var(--gold);color:var(--black)}}
+.place:active .go{transform:scale(.97)}
+
 .dest .note{padding:26px var(--pad) 0;font-size:.9rem;color:#56645a}
 .swipe{display:none;padding:14px var(--pad) 0;font-size:.9rem;color:#56645a}
 
@@ -326,7 +327,6 @@ footer .credits a{text-decoration:underline}
       <div class="track" id="track"></div>
       <p class="swipe" data-i18n="swipe">Deslize para ver mais destinos</p>
       <p class="note" data-i18n="dnote">Tempos indicativos, sem trânsito. Fazemos qualquer outro destino em Portugal.</p>
-      <div style="padding:22px var(--pad) 0"><a class="btn dark" href="#reservar" data-i18n="cta">Reservar transfer</a></div>
     </div>
   </section>
 
