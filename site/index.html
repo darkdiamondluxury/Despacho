@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Dark Diamond — Transfers privados em Lisboa</title>
+<title>Dark Diamond Luxury — Transfers privados em Lisboa</title>
 <meta name="description" content="Transfers privados e motorista ao seu dispor em Lisboa e em todo o país. Recebido pelo nome, à hora certa.">
 <meta name="theme-color" content="#082016">
 <link rel="preload" href="assets/bodoni-moda-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
@@ -42,6 +42,8 @@ button,input,select{font:inherit;color:inherit}
 .nav{position:fixed;inset:0 0 auto 0;z-index:50;display:flex;align-items:center;gap:28px;padding:18px var(--pad);transition:background .4s var(--ease-out),padding .4s var(--ease-out)}
 .nav.solid{background:var(--green);padding-block:12px}
 .brand{white-space:nowrap;display:flex;align-items:center;gap:10px;text-decoration:none;font-family:var(--display);font-size:1.3rem;letter-spacing:.01em}
+.brand .lux{color:var(--gold)}
+@media (max-width:420px){.brand .lux{display:none}}
 .brand svg{width:22px;height:22px;color:var(--gold)}
 .nav .links{display:flex;gap:26px;margin-left:auto}
 .nav .links a{text-decoration:none;color:var(--muted);font-size:.95rem;transition:color .2s}
@@ -196,7 +198,7 @@ footer .credits a{text-decoration:underline}
 </svg>
 
 <header class="nav" id="nav">
-  <a class="brand" href="#top" aria-label="Dark Diamond"><svg><use href="#dd"/></svg>Dark Diamond</a>
+  <a class="brand" href="#top" aria-label="Dark Diamond Luxury"><svg><use href="#dd"/></svg>Dark Diamond <span class="lux">Luxury</span></a>
   <nav class="links" aria-label="Principal">
     <a href="#experiencia" data-i18n="nav_exp">Experiência</a>
     <a href="#destinos" data-i18n="nav_dest">Destinos</a>
@@ -227,7 +229,7 @@ footer .credits a{text-decoration:underline}
         <div class="board" id="board" aria-live="polite">
           <div class="greet" data-i18n="welcome">Bem-vindo a Lisboa</div>
           <div class="name js-name">Sr. Andersen</div>
-          <div class="mark"><svg><use href="#dd"/></svg>Dark Diamond</div>
+          <div class="mark"><svg><use href="#dd"/></svg>Dark Diamond Luxury</div>
         </div>
         <div class="board-input">
           <label for="nameIn" data-i18n="try">Escreva o seu nome e veja a placa à sua espera</label>
@@ -340,7 +342,7 @@ footer .credits a{text-decoration:underline}
 </main>
 
 <footer>
-  <div class="word">Dark <em>Diamond</em></div>
+  <div class="word">Dark Diamond<br><em>Luxury</em></div>
   <div class="cols">
     <div><b data-i18n="c_contact">Contacto</b><a href="#" id="waLink">WhatsApp <span class="todo">[número]</span></a><a href="#" class="todo">[email]</a><a href="#" class="todo">[Instagram]</a></div>
     <div><b data-i18n="c_company">Empresa</b><span class="todo">[Nome legal] · NIPC [—]</span><br><span class="todo">[Morada]</span><br><span class="todo">RNAAT [—]</span></div>
@@ -352,7 +354,7 @@ footer .credits a{text-decoration:underline}
     <a href="https://unsplash.com/photos/On4IsBKcwDA">Ansis Kančs</a>,
     <a href="https://unsplash.com/photos/mKbLqBqzPB8">Eurico Craveiro</a>,
     <a href="https://unsplash.com/photos/buMAEjqZPA0">Ansis Kančs</a>.
-    © <span id="yr"></span> Dark Diamond.</p>
+    © <span id="yr"></span> Dark Diamond Luxury.</p>
 </footer>
 
 <script src="assets/gsap.min.js"></script>
@@ -428,7 +430,7 @@ function render(){
   const ch = document.getElementById('svcChips');
   ch.innerHTML = t.svcs.map((s,i)=>`<button type="button" aria-pressed="${i===svcPick}" data-i="${i}">${s}</button>`).join('');
   if(!document.getElementById('nameIn').value.trim()) document.querySelectorAll('.js-name').forEach(n=>n.textContent = lang==='pt'?'Sr. Andersen':'Mr. Andersen');
-  document.title = lang==='pt' ? 'Dark Diamond — Transfers privados em Lisboa' : 'Dark Diamond — Private transfers in Lisbon';
+  document.title = lang==='pt' ? 'Dark Diamond Luxury — Transfers privados em Lisboa' : 'Dark Diamond Luxury — Private transfers in Lisbon';
 }
 render();
 document.getElementById('yr').textContent = new Date().getFullYear();
