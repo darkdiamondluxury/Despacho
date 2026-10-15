@@ -111,7 +111,16 @@ button,input,select{font:inherit;color:inherit}
 .dest .head{padding:0 var(--pad);display:flex;justify-content:space-between;align-items:end;gap:20px;flex-wrap:wrap}
 .dest h2{font-size:clamp(2.4rem,1rem + 4.6vw,5.4rem);max-width:12ch}
 .dest .head p{max-width:34ch;color:#3e4c42}
-.track{display:flex;gap:clamp(36px,6vw,110px);padding:clamp(40px,8vh,90px) var(--pad) 0;width:max-content;will-change:transform}
+.track{display:flex;gap:clamp(36px,6vw,110px);padding:clamp(40px,8vh,90px) var(--pad) 0;width:max-content;will-change:transform;backface-visibility:hidden}
+@media (max-width:860px),(hover:none){
+  .dest .pin{height:auto;padding:clamp(80px,12vh,120px) 0 70px}
+  .track{width:auto;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding-inline:var(--pad);-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:6px;gap:44px}
+  .track::-webkit-scrollbar{display:none}
+  .place{scroll-snap-align:start}
+  .place .nm{font-size:clamp(3rem,15vw,5rem)}
+  .dest .place .go{opacity:1;transform:none}
+  .dest p.swipe{display:block}
+}
 .place{flex:none;background:none;border:0;padding:0;text-align:left;cursor:pointer;color:var(--green)}
 .place .nm{font-family:var(--display);font-size:clamp(3.2rem,1rem + 8vw,9.5rem);line-height:.92;letter-spacing:-.035em;display:block;transition:color .25s}
 .place .tm{display:flex;align-items:center;gap:10px;margin-top:14px;font-size:1.05rem;color:#3e4c42;font-variant-numeric:tabular-nums}
@@ -120,6 +129,7 @@ button,input,select{font:inherit;color:inherit}
 @media (hover:hover){.place:hover .nm{color:var(--olive)}.place:hover .go{opacity:1;transform:none}}
 .place:focus-visible .go{opacity:1;transform:none}
 .dest .note{padding:26px var(--pad) 0;font-size:.9rem;color:#56645a}
+.swipe{display:none;padding:14px var(--pad) 0;font-size:.9rem;color:#56645a}
 
 /* ---------- serviços ---------- */
 .services{background:var(--bone);color:var(--green);padding:clamp(80px,14vh,170px) var(--pad)}
@@ -130,7 +140,7 @@ button,input,select{font:inherit;color:inherit}
 .svc li+li{margin-top:6px}
 .svc h3{font-family:var(--display);font-weight:400;font-size:clamp(1.8rem,1.2rem + 1.8vw,3rem);letter-spacing:-.02em;line-height:1.05}
 .svc p{color:#3e4c42;max-width:46ch}
-@media (max-width:860px){.services .wrap{grid-template-columns:1fr}.services h2{position:static}}
+@media (max-width:860px){.services{padding-top:40px}.services .wrap{grid-template-columns:1fr}.services h2{position:static}}
 
 /* ---------- classe V ---------- */
 .vclass{position:relative;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);min-height:100svh;background:var(--green)}
@@ -264,7 +274,7 @@ footer .credits a{text-decoration:underline}
         </div>
       </article>
       <article class="panel">
-        <div class="ph"><img src="https://images.unsplash.com/photo-1606602075730-2a7b13dca70b?auto=format&fit=crop&w=2000&q=70" alt="" loading="lazy" onerror="this.style.display='none'"></div>
+        <div class="ph"><img src="https://images.unsplash.com/photo-1676158667885-9bef507aab93?auto=format&fit=crop&w=2000&q=70" alt="" loading="lazy" onerror="this.style.display='none'"></div>
         <div>
           <h2 class="display" data-i18n="s4h">Lisboa pela janela.</h2>
           <p data-i18n="s4p">Ao hotel, à reunião ou ao jantar. À hora marcada, sem pressas.</p>
@@ -282,6 +292,7 @@ footer .credits a{text-decoration:underline}
         <p data-i18n="dp">Tempo aproximado de viagem a partir do aeroporto de Lisboa. Escolha um destino para reservar.</p>
       </div>
       <div class="track" id="track"></div>
+      <p class="swipe" data-i18n="swipe">Deslize para ver mais destinos</p>
       <p class="note" data-i18n="dnote">Tempos indicativos, sem trânsito. Fazemos qualquer outro destino em Portugal.</p>
     </div>
   </section>
@@ -352,7 +363,7 @@ footer .credits a{text-decoration:underline}
     <a href="https://unsplash.com/photos/PNW4oeltJGo">William G</a>,
     <a href="https://unsplash.com/photos/yydI2Op7ILs">Iler Stoe</a>,
     <a href="https://unsplash.com/photos/On4IsBKcwDA">Ansis Kančs</a>,
-    <a href="https://unsplash.com/photos/mKbLqBqzPB8">Eurico Craveiro</a>,
+    <a href="https://unsplash.com/photos/51o4xlyaOjY">Eurico Craveiro</a>,
     <a href="https://unsplash.com/photos/buMAEjqZPA0">Ansis Kančs</a>.
     © <span id="yr"></span> Dark Diamond Luxury.</p>
 </footer>
@@ -375,7 +386,7 @@ const T = {
     s3h:'Entre. Descanse.',s3p:'Bancos em pele, espaço para todos e silêncio a bordo. A viagem é sua.',
     s4h:'Lisboa pela janela.',s4p:'Ao hotel, à reunião ou ao jantar. À hora marcada, sem pressas.',
     dh:'Para onde vamos?',dp:'Tempo aproximado de viagem a partir do aeroporto de Lisboa. Escolha um destino para reservar.',
-    dnote:'Tempos indicativos, sem trânsito. Fazemos qualquer outro destino em Portugal.',go:'Reservar este destino',
+    dnote:'Tempos indicativos, sem trânsito. Fazemos qualquer outro destino em Portugal.',swipe:'Deslize para ver mais destinos',go:'Reservar este destino',
     svch:'Ao seu ritmo.',v1h:'Aeroporto',v1p:'Recolha com o seu nome nas chegadas e acompanhamento do voo. Também para partidas.',
     v2h:'À disposição',v2p:'Um motorista e um carro só para si, à hora ou ao dia, para reuniões, compras ou um dia cheio.',
     v3h:'Tours privados',v3p:'Sintra, Cascais, Fátima, Évora ou o Douro, ao seu ritmo e com paragens onde quiser.',
@@ -398,7 +409,7 @@ const T = {
     s3h:'Step in. Unwind.',s3p:'Leather seats, room for everyone and a quiet cabin. The ride is yours.',
     s4h:'Lisbon through the window.',s4p:'To your hotel, your meeting or dinner. On time, never rushed.',
     dh:'Where to?',dp:'Approximate travel time from Lisbon airport. Pick a destination to book.',
-    dnote:'Indicative times without traffic. We drive anywhere in Portugal.',go:'Book this destination',
+    dnote:'Indicative times without traffic. We drive anywhere in Portugal.',swipe:'Swipe to see more destinations',go:'Book this destination',
     svch:'At your pace.',v1h:'Airport',v1p:'Meet and greet at arrivals with your name, flight tracking included. Departures too.',
     v2h:'At disposal',v2p:'A chauffeur and car just for you, by the hour or the day, for meetings, shopping or a full day out.',
     v3h:'Private tours',v3p:'Sintra, Cascais, Fátima, Évora or the Douro, at your pace and stopping where you like.',
@@ -479,6 +490,7 @@ addEventListener('scroll',()=>nav.classList.toggle('solid', scrollY>innerHeight*
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 if(window.gsap && !reduce){
   gsap.registerPlugin(ScrollTrigger);
+  ScrollTrigger.config({ignoreMobileResize:true});
   const E='expo.out';
 
   // 1) Entrada: a imagem assenta, o título sobe, a placa chega
@@ -506,7 +518,16 @@ if(window.gsap && !reduce){
   // 3) Destinos: a faixa anda na horizontal enquanto se faz scroll
   const track=document.getElementById('track');
   const dist=()=>Math.max(0, track.scrollWidth - innerWidth);
-  gsap.to(track,{x:()=>-dist(),ease:'none',scrollTrigger:{trigger:'.dest',start:'top top',end:()=>'+='+dist(),pin:'.dest .pin',scrub:.6,invalidateOnRefresh:true}});
+  // No computador o ecrã fica fixo e a faixa anda com o scroll; no telemóvel desliza-se com o dedo.
+  ScrollTrigger.matchMedia({
+    '(min-width: 861px) and (hover: hover)': ()=>{
+      gsap.to(track,{x:()=>-dist(),ease:'none',force3D:true,
+        scrollTrigger:{trigger:'.dest',start:'top top',end:()=>'+='+(dist()*1.4),pin:'.dest .pin',scrub:1.2,anticipatePin:1,invalidateOnRefresh:true}});
+    },
+    '(max-width: 860px), (hover: none)': ()=>{
+      gsap.from('.place',{x:60,opacity:0,duration:1,stagger:.07,ease:'expo.out',scrollTrigger:{trigger:'.dest',start:'top 75%'}});
+    }
+  });
 
   // 4) Entradas suaves por secção
   const rise=(sel,trig)=>gsap.from(sel,{y:32,opacity:0,duration:1,stagger:.08,ease:E,scrollTrigger:{trigger:trig||sel,start:'top 82%'}});
