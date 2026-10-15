@@ -112,14 +112,23 @@ button,input,select{font:inherit;color:inherit}
 .dest h2{font-size:clamp(2.4rem,1rem + 4.6vw,5.4rem);max-width:12ch}
 .dest .head p{max-width:34ch;color:#3e4c42}
 .track{display:flex;gap:clamp(36px,6vw,110px);padding:clamp(40px,8vh,90px) var(--pad) 0;width:max-content;will-change:transform;backface-visibility:hidden}
+/* carrossel com deslize nativo em todos os ecrãs; o scroll vertical nunca fica preso */
+.dest .pin{height:auto;padding:clamp(80px,14vh,150px) 0 clamp(60px,10vh,110px)}
+.track{width:auto;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding-inline:var(--pad);scroll-behavior:smooth;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:6px;overscroll-behavior-x:contain}
+.track::-webkit-scrollbar{display:none}
+.track.drag{scroll-snap-type:none;scroll-behavior:auto;cursor:grabbing}
+.place{scroll-snap-align:start}
+.dest .arrows{display:flex;gap:10px}
+.dest .arrows button{width:56px;height:56px;border-radius:50%;border:0;background:var(--green);color:var(--bone);font-size:1.4rem;cursor:pointer;transition:transform .16s var(--ease-out),opacity .2s}
+.dest .arrows button:active{transform:scale(.94)}
+.dest .arrows button:disabled{opacity:.25;cursor:default}
+@media (hover:hover) and (pointer:fine){.track{cursor:grab}}
 @media (max-width:860px),(hover:none){
-  .dest .pin{height:auto;padding:clamp(80px,12vh,120px) 0 70px}
-  .track{width:auto;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding-inline:var(--pad);-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:6px;gap:44px}
-  .track::-webkit-scrollbar{display:none}
-  .place{scroll-snap-align:start}
-  .place .nm{font-size:clamp(3rem,15vw,5rem)}
+  .dest .place .nm{font-size:clamp(2.5rem,12vw,4.2rem)}
   .dest .place .go{opacity:1;transform:none}
   .dest p.swipe{display:block}
+  .dest .arrows{display:none}
+  .track{gap:44px}
 }
 .place{flex:none;background:none;border:0;padding:0;text-align:left;cursor:pointer;color:var(--green)}
 .place .nm{font-family:var(--display);font-size:clamp(3.2rem,1rem + 8vw,9.5rem);line-height:.92;letter-spacing:-.035em;display:block;transition:color .25s}
@@ -306,6 +315,7 @@ footer .cols{grid-template-columns:1fr}}
       <div class="head">
         <h2 class="display" id="dest-h" data-i18n="dh">Para onde vamos?</h2>
         <p data-i18n="dp">Tempo aproximado de viagem a partir do aeroporto de Lisboa. Escolha um destino para reservar.</p>
+        <div class="arrows"><button type="button" id="prevD" aria-label="Destinos anteriores">←</button><button type="button" id="nextD" aria-label="Mais destinos">→</button></div>
       </div>
       <div class="track" id="track"></div>
       <p class="swipe" data-i18n="swipe">Deslize para ver mais destinos</p>
@@ -509,6 +519,21 @@ document.querySelectorAll('a[href^="#"]').forEach(a=>a.addEventListener('click',
   if(id && id!=='top' && !el) return; e.preventDefault(); jump(el);
 }));
 
+/* destinos: setas e arrastar com o rato */
+(()=>{
+  const tr=document.getElementById('track'), pv=document.getElementById('prevD'), nx=document.getElementById('nextD');
+  const step=()=>Math.max(300, tr.clientWidth*.7);
+  const upd=()=>{ pv.disabled = tr.scrollLeft<8; nx.disabled = tr.scrollLeft+tr.clientWidth >= tr.scrollWidth-8; };
+  pv.addEventListener('click',()=>tr.scrollBy({left:-step()}));
+  nx.addEventListener('click',()=>tr.scrollBy({left:step()}));
+  tr.addEventListener('scroll',upd,{passive:true}); addEventListener('resize',upd); setTimeout(upd,300);
+  let down=false,sx=0,sl=0,moved=false;
+  tr.addEventListener('pointerdown',e=>{ if(e.pointerType!=='mouse') return; down=true;moved=false;sx=e.clientX;sl=tr.scrollLeft; });
+  addEventListener('pointermove',e=>{ if(!down) return; const dx=e.clientX-sx; if(Math.abs(dx)>4){moved=true;tr.classList.add('drag');} tr.scrollLeft=sl-dx; });
+  addEventListener('pointerup',()=>{ if(!down) return; down=false; tr.classList.remove('drag'); });
+  tr.addEventListener('click',e=>{ if(moved){ e.stopPropagation(); e.preventDefault(); moved=false; } },true);
+})();
+
 /* nav fica sólida depois do topo */
 const nav=document.getElementById('nav');
 addEventListener('scroll',()=>nav.classList.toggle('solid', scrollY>innerHeight*.6),{passive:true});
@@ -544,17 +569,7 @@ if(window.gsap && !reduce){
 
   // 3) Destinos: a faixa anda na horizontal enquanto se faz scroll
   const track=document.getElementById('track');
-  const dist=()=>Math.max(0, track.scrollWidth - innerWidth);
-  // No computador o ecrã fica fixo e a faixa anda com o scroll; no telemóvel desliza-se com o dedo.
-  ScrollTrigger.matchMedia({
-    '(min-width: 861px) and (hover: hover)': ()=>{
-      gsap.to(track,{x:()=>-dist(),ease:'none',force3D:true,
-        scrollTrigger:{trigger:'.dest',start:'top top',end:()=>'+='+(dist()*1.4),pin:'.dest .pin',scrub:1.2,anticipatePin:1,invalidateOnRefresh:true}});
-    },
-    '(max-width: 860px), (hover: none)': ()=>{
-      gsap.from('.place',{x:60,opacity:0,duration:1,stagger:.07,ease:'expo.out',scrollTrigger:{trigger:'.dest',start:'top 75%'}});
-    }
-  });
+    gsap.from('.place',{x:60,opacity:0,duration:1,stagger:.07,ease:'expo.out',scrollTrigger:{trigger:'.dest',start:'top 75%'}});
 
   // 4) Entradas suaves por secção
   const rise=(sel,trig)=>gsap.from(sel,{y:32,opacity:0,duration:1,stagger:.08,ease:E,scrollTrigger:{trigger:trig||sel,start:'top 82%'}});
