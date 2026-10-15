@@ -3,7 +3,7 @@ import { router } from 'expo-router';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 
 import { useAuth } from '@/lib/auth';
-import { useDrivers, useServices } from '@/lib/data';
+import { useDrivers, useLive, useServices } from '@/lib/data';
 import { ENV_NAME, todayISO } from '@/lib/supabase';
 import { Btn, Card, Pill } from '@/ui/kit';
 import { C, STATUS } from '@/ui/theme';
@@ -21,6 +21,7 @@ export default function Inicio() {
   const { profile, companyName, signOut } = useAuth();
   const { rows } = useServices();
   const { rows: drivers } = useDrivers();
+  const [liveState, liveDetail] = useLive().split('|');
   const today = todayISO();
   const hoje = rows.filter((r) => r.date === today && r.status !== 'cancelado');
   const porAlocar = rows.filter((r) => r.date >= today && !r.driver_id && r.status !== 'cancelado');
@@ -32,6 +33,10 @@ export default function Inicio() {
       <View>
         <Text style={{ fontSize: 22, fontWeight: '700', color: C.green }}>Olá, {profile?.full_name.split(' ')[0]}</Text>
         <Text style={{ color: C.muted }}>{companyName} · ambiente {ENV_NAME}</Text>
+        <Text style={{ color: liveState === 'ao vivo' ? C.ok : liveState === 'a ligar' ? C.muted : C.danger, marginTop: 4, fontSize: 13 }}>
+          ● {liveState === 'ao vivo' ? 'Ao vivo' : liveState === 'a ligar' ? 'A ligar ao tempo real…' : 'Sem tempo real (atualiza a cada 30 s)'}
+          {liveDetail ? ` · ${liveDetail}` : ''}
+        </Text>
       </View>
 
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 10 }}>

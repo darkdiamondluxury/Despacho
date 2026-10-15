@@ -31,6 +31,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [companyName, setCompanyName] = useState('');
 
   const loadProfile = useCallback(async (s: Session | null) => {
+    // Garante que o tempo real usa o login atual (sem isto pode ligar como anónimo e não receber nada).
+    supabase.realtime.setAuth(s?.access_token ?? null);
     if (!s) {
       setProfile(null);
       setCompanyName('');
