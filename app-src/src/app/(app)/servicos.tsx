@@ -96,7 +96,9 @@ export default function Servicos() {
                         <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
                           {drivers.map((d) => (
                             <Chip key={d.id} label={d.name} on={d.id === r.driver_id}
-                              onPress={() => update(r.id, { driver_id: d.id === r.driver_id ? null : d.id })} />
+                              onPress={() => update(r.id, { driver_id: d.id === r.driver_id ? null : d.id,
+                                // trocar de driver anula o envio anterior
+                                ...(r.sent_at || r.status === 'recusado' ? { status: 'pendente', sent_at: null, seen_by_driver: false } : {}) })} />
                           ))}
                           {drivers.length === 0 && <Text style={{ color: C.muted }}>Adiciona drivers no separador Frota.</Text>}
                         </View>
@@ -107,6 +109,16 @@ export default function Servicos() {
                               onPress={() => update(r.id, { vehicle_id: v.id === r.vehicle_id ? null : v.id })} />
                           ))}
                         </View>
+                        {r.status === 'recusado' && r.decline_reason ? (
+                          <Text style={{ color: C.danger, marginTop: 6 }}>Recusado: {r.decline_reason}</Text>
+                        ) : null}
+                        {r.sent_at && r.status === 'enviado' ? (
+                          <Text style={{ color: C.muted, marginTop: 6 }}>{r.seen_by_driver ? '👁 O driver já viu' : 'Ainda não visto pelo driver'}</Text>
+                        ) : null}
+                        {r.driver_id && (r.status === 'pendente' || r.status === 'recusado') ? (
+                          <Btn kind="gold" title={`Enviar a ${drv?.name ?? 'driver'}`}
+                            onPress={() => update(r.id, { status: 'enviado', sent_at: new Date().toISOString(), seen_by_driver: false, decline_reason: null })} />
+                        ) : null}
                         <View style={{ flexDirection: 'row', gap: 8, marginTop: 6 }}>
                           <View style={{ flex: 1 }}>
                             <Btn kind="ghost" title={r.status === 'cancelado' ? 'Reativar' : 'Cancelar serviço'}

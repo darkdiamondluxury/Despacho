@@ -11,6 +11,7 @@ export type Profile = {
   role: 'admin' | 'office' | 'driver';
   can_money: boolean;
   can_track: boolean;
+  active: boolean;
 };
 
 type AuthState = {
@@ -39,6 +40,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
     const { data } = await supabase.from('profiles').select('*').eq('id', s.user.id).maybeSingle();
+    if (data && !data.active) {
+      // Acesso desativado pelo administrador
+      await supabase.auth.signOut();
+      return;
+    }
     setProfile((data as Profile) ?? null);
     if (data) {
       const { data: c } = await supabase.from('companies').select('name').eq('id', data.company_id).maybeSingle();

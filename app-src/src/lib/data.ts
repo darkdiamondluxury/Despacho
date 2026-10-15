@@ -14,6 +14,8 @@ export type Service = {
   pickup: string | null; dropoff: string | null; flight: string | null;
   client_name: string | null; client_phone: string | null; pax: number | null;
   notes: string | null; status: string; driver_id: string | null; vehicle_id: string | null;
+  sent_at: string | null; seen_by_driver: boolean; arrived_at: string | null; decline_reason: string | null;
+  wait_min: number | null;
 };
 export type Driver = { id: string; name: string; phone: string | null; available: boolean };
 export type Vehicle = { id: string; name: string; plate: string | null; category: string; seats: number | null };

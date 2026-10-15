@@ -33,7 +33,10 @@ function Gate() {
       <Stack.Protected guard={!!session && !profile}>
         <Stack.Screen name="empresa" />
       </Stack.Protected>
-      <Stack.Protected guard={!!session && !!profile}>
+      <Stack.Protected guard={!!session && !!profile && profile.role === 'driver'}>
+        <Stack.Screen name="(driver)" />
+      </Stack.Protected>
+      <Stack.Protected guard={!!session && !!profile && profile.role !== 'driver'}>
         <Stack.Screen name="(app)" />
         <Stack.Screen
           name="servico/novo"
