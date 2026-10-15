@@ -44,10 +44,13 @@ export default function Meus() {
   const today = todayISO();
 
   const done = ['concluido', 'no_show', 'cancelado'];
-  const list = useMemo(() => rows.filter((r) =>
-    view === 'proximos' ? !done.includes(r.status) || r.date === today : done.includes(r.status) && r.date !== today,
+  // Ativos em "Hoje e próximos"; terminados vão logo para o Histórico (mais recentes primeiro).
+  const list = useMemo(() => {
+    if (view === 'proximos') return rows.filter((r) => !done.includes(r.status));
+    return rows.filter((r) => done.includes(r.status))
+      .sort((a, b) => (b.date + (b.time ?? '')).localeCompare(a.date + (a.time ?? '')));
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  ), [rows, view, today]);
+  }, [rows, view]);
   const novos = rows.filter((r) => r.status === 'enviado').length;
 
   // Marca como "visto" os serviços novos que aparecem no ecrã
