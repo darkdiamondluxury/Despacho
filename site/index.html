@@ -29,7 +29,7 @@
   color-scheme:dark;
 }
 *{box-sizing:border-box;margin:0}
-html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+html{-webkit-text-size-adjust:100%}
 body{background:var(--green);color:var(--ink);font-family:var(--text);font-size:clamp(1.0625rem,1rem + .25vw,1.1875rem);line-height:1.5;-webkit-font-smoothing:antialiased;overflow-x:hidden}
 img{display:block;max-width:100%}
 a{color:inherit;text-underline-offset:.18em;text-decoration-thickness:.07em}
@@ -175,15 +175,17 @@ button,input,select{font:inherit;color:inherit}
 
 /* ---------- rodapé ---------- */
 footer{background:var(--green);padding:clamp(70px,12vh,130px) var(--pad) 40px;overflow:hidden}
-footer .word{font-family:var(--display);font-size:clamp(3.4rem,15vw,15rem);line-height:.85;letter-spacing:-.045em;white-space:nowrap;color:var(--ink)}
+footer .word{font-family:var(--display);font-size:clamp(2.8rem,13.2vw,14rem);line-height:.85;letter-spacing:-.045em;white-space:nowrap;color:var(--ink)}
 footer .word em{font-style:normal;color:var(--gold)}
+footer .totop{margin-top:40px}
 footer .cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:30px;margin-top:56px;font-size:.95rem;color:var(--muted)}
 footer .cols b{display:block;color:var(--ink);font-weight:500;margin-bottom:8px}
 footer .cols a{display:block;text-decoration:none;margin-bottom:4px}
 footer .cols a:hover{color:var(--ink)}
 footer .credits{margin-top:44px;font-size:.82rem;color:#7f8573;max-width:110ch}
 footer .credits a{text-decoration:underline}
-@media (max-width:860px){footer .cols{grid-template-columns:1fr}}
+@media (max-width:860px){footer .totop{margin-top:40px}
+footer .cols{grid-template-columns:1fr}}
 
 /* placeholders visíveis para preencher */
 .todo{color:var(--gold)}
@@ -267,7 +269,7 @@ footer .credits a{text-decoration:underline}
         </div>
       </article>
       <article class="panel">
-        <div class="ph"><img src="https://images.unsplash.com/photo-1639060015191-57b7c025941d?auto=format&fit=crop&w=2000&q=70" alt="" loading="lazy" onerror="this.style.display='none'"></div>
+        <div class="ph"><img src="https://images.unsplash.com/photo-1580929945040-a16adedf9f6a?auto=format&fit=crop&w=2000&q=70" alt="" loading="lazy" onerror="this.style.display='none'"></div>
         <div>
           <h2 class="display" data-i18n="s3h">Entre. Descanse.</h2>
           <p data-i18n="s3p">Bancos em pele, espaço para todos e silêncio a bordo. A viagem é sua.</p>
@@ -354,6 +356,7 @@ footer .credits a{text-decoration:underline}
 
 <footer>
   <div class="word">Dark Diamond<br><em>Luxury</em></div>
+  <button class="btn ghost totop" type="button" id="toTop" data-i18n="top">Voltar ao início ↑</button>
   <div class="cols">
     <div><b data-i18n="c_contact">Contacto</b><a href="#" id="waLink">WhatsApp <span class="todo">[número]</span></a><a href="#" class="todo">[email]</a><a href="#" class="todo">[Instagram]</a></div>
     <div><b data-i18n="c_company">Empresa</b><span class="todo">[Nome legal] · NIPC [—]</span><br><span class="todo">[Morada]</span><br><span class="todo">RNAAT [—]</span></div>
@@ -362,7 +365,7 @@ footer .credits a{text-decoration:underline}
   <p class="credits"><span data-i18n="credits">Fotografias ilustrativas, Unsplash License:</span>
     <a href="https://unsplash.com/photos/PNW4oeltJGo">William G</a>,
     <a href="https://unsplash.com/photos/yydI2Op7ILs">Iler Stoe</a>,
-    <a href="https://unsplash.com/photos/DnUbTwfOX0g">Christian Wiediger</a>,
+    <a href="https://unsplash.com/photos/oe4QHK9EwS8">Luis Quintero</a>,
     <a href="https://unsplash.com/photos/gOLCAOuc7iA">Svetlana Gumerova</a>,
     <a href="https://unsplash.com/photos/buMAEjqZPA0">Ansis Kančs</a>.
     © <span id="yr"></span> Dark Diamond Luxury.</p>
@@ -398,7 +401,7 @@ const T = {
     l_svc:'Serviço',l_to:'Destino',ph_to:'Hotel, morada ou cidade',l_date:'Data',l_time:'Hora',l_pax:'Passageiros',l_flight:'Voo (opcional)',l_name:'Nome',
     send:'Enviar pelo WhatsApp',hint:'Abre o WhatsApp com a mensagem pronta. Não guardamos nada neste site.',
     nowa:'O número de WhatsApp ainda não está definido neste site.',
-    c_contact:'Contacto',c_company:'Empresa',c_legal:'Informação',c_priv:'Privacidade',c_sup:'Suporte da app',credits:'Fotografias ilustrativas, Unsplash License:',
+    c_contact:'Contacto',top:'Voltar ao início ↑',c_company:'Empresa',c_legal:'Informação',c_priv:'Privacidade',c_sup:'Suporte da app',credits:'Fotografias ilustrativas, Unsplash License:',
     svcs:['Aeroporto','À disposição','Tour','Evento','Longa distância'],from:'desde o aeroporto',
     msg:(d)=>`Olá! Gostaria de reservar.\nServiço: ${d.svc}\nDestino: ${d.to}\nData: ${d.date} ${d.time}\nPassageiros: ${d.pax}${d.flight?`\nVoo: ${d.flight}`:''}\nNome: ${d.name}`},
   en:{nav_exp:'Experience',nav_dest:'Destinations',nav_svc:'Services',nav_fleet:'V-Class',cta_short:'Book',
@@ -421,7 +424,7 @@ const T = {
     l_svc:'Service',l_to:'Destination',ph_to:'Hotel, address or city',l_date:'Date',l_time:'Time',l_pax:'Passengers',l_flight:'Flight (optional)',l_name:'Name',
     send:'Send via WhatsApp',hint:'Opens WhatsApp with the message ready. Nothing is stored on this site.',
     nowa:'The WhatsApp number is not set on this site yet.',
-    c_contact:'Contact',c_company:'Company',c_legal:'Information',c_priv:'Privacy',c_sup:'App support',credits:'Illustrative photographs, Unsplash License:',
+    c_contact:'Contact',top:'Back to top ↑',c_company:'Company',c_legal:'Information',c_priv:'Privacy',c_sup:'App support',credits:'Illustrative photographs, Unsplash License:',
     svcs:['Airport','At disposal','Tour','Event','Long distance'],from:'from the airport',
     msg:(d)=>`Hello! I'd like to book.\nService: ${d.svc}\nDestination: ${d.to}\nDate: ${d.date} ${d.time}\nPassengers: ${d.pax}${d.flight?`\nFlight: ${d.flight}`:''}\nName: ${d.name}`}
 };
@@ -465,7 +468,7 @@ document.getElementById('fName').addEventListener('input', e=> e.target.dataset.
 document.getElementById('track').addEventListener('click', e=>{
   const b=e.target.closest('.place'); if(!b) return;
   document.getElementById('fTo').value = PLACES[+b.dataset.i][0];
-  document.getElementById('reservar').scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});
+  jump(document.getElementById('reservar'));
   setTimeout(()=>document.getElementById('fDate').focus({preventScroll:true}), 700);
 });
 document.getElementById('svcChips').addEventListener('click', e=>{
@@ -481,6 +484,14 @@ document.getElementById('form').addEventListener('submit', e=>{
   if(!WHATSAPP){ const h=document.getElementById('hint'); h.textContent=t.nowa; h.style.color='var(--gold)'; return; }
   window.open(`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(t.msg(d))}`,'_blank','noopener');
 });
+
+/* Links internos e "voltar ao início": salto imediato, sem atravessar as animações */
+function jump(el){ const y = el ? el.getBoundingClientRect().top + scrollY : 0; scrollTo({top:y, behavior:'instant'}); }
+document.getElementById('toTop').addEventListener('click', ()=>jump(null));
+document.querySelectorAll('a[href^="#"]').forEach(a=>a.addEventListener('click', e=>{
+  const id=a.getAttribute('href').slice(1); const el = id==='top' ? null : document.getElementById(id);
+  if(id && id!=='top' && !el) return; e.preventDefault(); jump(el);
+}));
 
 /* nav fica sólida depois do topo */
 const nav=document.getElementById('nav');
