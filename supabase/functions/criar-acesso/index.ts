@@ -26,17 +26,24 @@ Deno.serve(async (req) => {
   try {
     const url = Deno.env.get('SUPABASE_URL')!;
     const anon = Deno.env.get('SUPABASE_ANON_KEY')!;
-    const service = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const service = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
 
     // 1) Quem está a pedir? (pelo login que a app envia)
     const asUser = createClient(url, anon, { global: { headers: { Authorization: req.headers.get('Authorization') ?? '' } } });
     const { data: { user } } = await asUser.auth.getUser();
     if (!user) return json({ error: 'Sem sessão iniciada.' }, 401);
 
-    const admin = createClient(url, service, { auth: { persistSession: false, autoRefreshToken: false } });
-    const { data: me } = await admin.from('profiles').select('company_id, role, active').eq('id', user.id).maybeSingle();
+    // 2) É admin? Lê o próprio perfil com o login dele (as regras de acesso deixam ver o próprio perfil).
+    const { data: me, error: meErr } = await asUser.from('profiles').select('company_id, role, active').eq('id', user.id).maybeSingle();
+    if (meErr) return json({ error: `Não consegui ler o teu perfil: ${meErr.message}` }, 500);
     if (!me || !me.active || me.role !== 'admin') return json({ error: 'Só um administrador pode gerir acessos.' }, 403);
     const company = me.company_id as string;
+
+    // 3) Cliente com a chave secreta, só para o que exige privilégios (criar contas, etc.)
+    if (!service) return json({ error: 'Falta a chave secreta (SUPABASE_SERVICE_ROLE_KEY) nas variáveis da função.' }, 500);
+    const admin = createClient(url, service, { auth: { persistSession: false, autoRefreshToken: false } });
+    const { error: probe } = await admin.from('profiles').select('id').limit(1);
+    if (probe) return json({ error: `A chave secreta não está a funcionar: ${probe.message}` }, 500);
 
     const b = await req.json().catch(() => ({}));
 
