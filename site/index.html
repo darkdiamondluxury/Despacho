@@ -129,7 +129,6 @@ button,input,select,textarea{font:inherit;color:inherit}
 @media (hover:hover) and (pointer:fine){.track{cursor:grab}}
 @media (max-width:860px),(hover:none){
   .dest .place .nm{font-size:clamp(2.5rem,12vw,4.2rem)}
-  .dest .place .go{display:inline-flex;align-items:center;margin-top:16px;padding:12px 22px;border-radius:99px;background:var(--black);color:var(--gold);font-size:.96rem;font-weight:500;transition:background .2s,color .2s,transform .16s var(--ease-out)}
   .dest p.swipe{display:block}
   .dest .arrows{display:none}
   .track{gap:44px}
@@ -138,7 +137,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 .place .nm{font-family:var(--display);font-weight:300;font-size:clamp(3.2rem,1rem + 8vw,9.5rem);line-height:.92;letter-spacing:-.02em;display:block;transition:color .25s}
 .place .tm{display:flex;align-items:center;gap:10px;margin-top:14px;font-size:1.05rem;color:#3e4c42;font-variant-numeric:tabular-nums}
 .place .tm b{font-weight:500;color:var(--black)}
-.place .go{display:inline-block;margin-top:10px;font-size:.95rem;color:#9a7f35;font-weight:600;opacity:0;transform:translateY(6px);transition:opacity .25s var(--ease-out),transform .25s var(--ease-out)}
+.place .go{display:inline-flex;align-items:center;margin-top:16px;padding:12px 22px;border-radius:99px;background:var(--black);color:var(--gold);font-size:.96rem;font-weight:500;transition:background .2s,color .2s,transform .16s var(--ease-out)}
 @media (hover:hover){.place:hover .nm{color:#9a7f35}.place:hover .go{background:var(--gold);color:var(--black)}}
 .place:active .go{transform:scale(.97)}
 
