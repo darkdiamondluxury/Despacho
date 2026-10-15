@@ -211,7 +211,7 @@ footer .credits a{text-decoration:underline}
 
 .float-cta{position:fixed;z-index:60;right:var(--pad);bottom:calc(18px + env(safe-area-inset-bottom));box-shadow:0 14px 34px -10px rgba(0,0,0,.55);opacity:0;transform:translateY(16px);pointer-events:none;transition:opacity .3s var(--ease-out),transform .3s var(--ease-out),background .2s}
 .float-cta.on{opacity:1;transform:none;pointer-events:auto}
-@media (max-width:560px){.float-cta{left:var(--pad);right:var(--pad)}footer{padding-bottom:110px}}
+@media (max-width:860px),(hover:none){.float-cta{display:none!important}}
 
 /* placeholders visíveis para preencher */
 .todo{color:var(--gold)}
