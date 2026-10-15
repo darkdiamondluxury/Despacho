@@ -6,11 +6,10 @@
 <title>Dark Diamond Luxury — Transfers privados em Lisboa</title>
 <meta name="description" content="Transfers privados e motorista ao seu dispor em Lisboa e em todo o país. Recebido pelo nome, à hora certa.">
 <meta name="theme-color" content="#082016">
-<link rel="preload" href="assets/bodoni-moda-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fraunces-latin-full-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/figtree-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 <style>
-@font-face{font-family:"Bodoni Moda";src:url(assets/bodoni-moda-latin-400-normal.woff2) format("woff2");font-weight:400;font-display:swap}
-@font-face{font-family:"Bodoni Moda";src:url(assets/bodoni-moda-latin-500-normal.woff2) format("woff2");font-weight:500;font-display:swap}
+@font-face{font-family:"Fraunces";src:url(assets/fraunces-latin-full-normal.woff2) format("woff2-variations"),url(assets/fraunces-latin-full-normal.woff2) format("woff2");font-weight:100 900;font-display:swap}
 @font-face{font-family:"Figtree";src:url(assets/figtree-latin-400-normal.woff2) format("woff2");font-weight:400;font-display:swap}
 @font-face{font-family:"Figtree";src:url(assets/figtree-latin-500-normal.woff2) format("woff2");font-weight:500;font-display:swap}
 @font-face{font-family:"Figtree";src:url(assets/figtree-latin-600-normal.woff2) format("woff2");font-weight:600;font-display:swap}
@@ -21,7 +20,8 @@
   --gold:#CAB26A; --olive:#7C844C; --stone:#7C7C6C;
   --bone:#ECE8DC; --bone-2:#E2DDCD;
   --ink:#EEEADF; --muted:#AEB09E;
-  --display:"Bodoni Moda", "Didot", Georgia, serif;
+  --display:"Fraunces", Georgia, serif;
+  --black:#060807; --black-2:#0d100e;
   --text:"Figtree", "Helvetica Neue", Arial, sans-serif;
   --ease-out:cubic-bezier(.23,1,.32,1);
   --ease-io:cubic-bezier(.77,0,.175,1);
@@ -36,11 +36,12 @@ a{color:inherit;text-underline-offset:.18em;text-decoration-thickness:.07em}
 ::selection{background:var(--gold);color:var(--green)}
 :focus-visible{outline:2px solid var(--gold);outline-offset:3px;border-radius:2px}
 button,input,select{font:inherit;color:inherit}
-.display{font-family:var(--display);font-weight:400;letter-spacing:-.025em;line-height:.98;text-wrap:balance}
+.display,.brand,.board .name,.bigboard .name,.place .nm,.svc h3,.facts b,footer .word{font-family:var(--display);font-variation-settings:"SOFT" 100,"WONK" 0;font-optical-sizing:auto}
+.display{font-weight:330;letter-spacing:-.022em;line-height:1;text-wrap:balance}
 
 /* ---------- navegação ---------- */
 .nav{position:fixed;inset:0 0 auto 0;z-index:50;display:flex;align-items:center;gap:28px;padding:18px var(--pad);transition:background .4s var(--ease-out),padding .4s var(--ease-out)}
-.nav.solid{background:var(--green);padding-block:12px}
+.nav.solid{background:var(--black);padding-block:12px}
 .brand{white-space:nowrap;display:flex;align-items:center;gap:10px;text-decoration:none;font-family:var(--display);font-size:1.3rem;letter-spacing:.01em}
 .brand .lux{color:var(--gold)}
 @media (max-width:520px){.brand{font-size:1.08rem;gap:8px}.brand svg{width:19px;height:19px}.lang button{padding:5px 9px}}
@@ -54,6 +55,8 @@ button,input,select{font:inherit;color:inherit}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;border:0;border-radius:99px;padding:15px 26px;background:var(--gold);color:var(--green);font-weight:600;font-size:1rem;text-decoration:none;cursor:pointer;transition:transform .16s var(--ease-out),background .2s}
 .btn:active{transform:scale(.97)}
 @media (hover:hover){.btn:hover{background:#d8c27c}}
+.btn.dark{background:var(--green);color:var(--bone)}
+@media (hover:hover){.btn.dark:hover{background:var(--black)}}
 .btn.ghost{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1.5px rgba(238,234,223,.45)}
 .nav .btn{padding:10px 20px;font-size:.92rem}
 @media (max-width:860px){.nav .links{display:none}.nav{gap:12px}.nav .lang{margin-left:auto}}
@@ -63,7 +66,7 @@ button,input,select{font:inherit;color:inherit}
 .hero{position:relative;min-height:100svh;display:grid;align-items:end;padding:120px var(--pad) clamp(40px,7vh,80px);overflow:hidden;isolation:isolate}
 .hero .bg{position:absolute;inset:0;z-index:-2;background:var(--green-2)}
 .hero .bg img{width:100%;height:100%;object-fit:cover;object-position:60% 50%;filter:saturate(.75) contrast(1.05)}
-.hero::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(8,32,22,.55) 0%,rgba(8,32,22,.25) 35%,rgba(8,32,22,.92) 100%)}
+.hero::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(6,8,7,.7) 0%,rgba(6,8,7,.25) 38%,rgba(6,8,7,.94) 100%)}
 .hero-grid{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,.6fr);gap:clamp(24px,5vw,80px);align-items:end}
 .hero h1{font-size:clamp(3rem,1rem + 5.1vw,6.6rem)}
 .hero h1 .line>span{white-space:nowrap}
@@ -77,6 +80,7 @@ button,input,select{font:inherit;color:inherit}
 .board{background:var(--bone);color:var(--green);border-radius:4px;padding:26px 28px 22px;transform:rotate(-1.2deg);box-shadow:0 30px 60px -20px rgba(0,0,0,.55)}
 .board .greet{font-size:.95rem;color:#3b4a40}
 .board .name{font-family:var(--display);font-size:clamp(2rem,1.2rem + 2.6vw,3.4rem);line-height:1;letter-spacing:-.02em;margin-top:6px;min-height:1em;word-break:break-word}
+.board .name.empty,.bigboard .name.empty{opacity:.32}
 .board .mark{display:flex;align-items:center;gap:8px;margin-top:18px;font-size:.85rem;color:#4b5a4f}
 .board .mark svg{width:15px;height:15px;color:var(--olive)}
 .board-input{margin-top:16px;display:flex;flex-direction:column;gap:6px}
@@ -97,6 +101,7 @@ button,input,select{font:inherit;color:inherit}
 .panel h2{font-size:clamp(2.6rem,1rem + 6vw,7rem);max-width:12ch}
 .panel p{margin-top:16px;max-width:38ch;font-size:clamp(1.05rem,1rem + .35vw,1.3rem);opacity:.92}
 .panel.field{background:var(--green-3)}
+.panel-cta{margin-top:26px}
 .panel.field .bigboard{position:absolute;right:var(--pad);top:50%;translate:0 -58%;width:min(46vw,620px);background:var(--bone);color:var(--green);border-radius:4px;padding:clamp(22px,3vw,44px);rotate:1.5deg}
 .bigboard .name{font-family:var(--display);font-size:clamp(2.4rem,1rem + 5vw,6.2rem);line-height:.95;letter-spacing:-.03em;word-break:break-word}
 .bigboard .greet{font-size:1rem;color:#3b4a40;margin-bottom:10px}
@@ -141,14 +146,20 @@ button,input,select{font:inherit;color:inherit}
 .swipe{display:none;padding:14px var(--pad) 0;font-size:.9rem;color:#56645a}
 
 /* ---------- serviços ---------- */
-.services{background:var(--bone);color:var(--green);padding:clamp(80px,14vh,170px) var(--pad)}
+.services{background:var(--black);color:var(--ink);padding:clamp(80px,14vh,170px) var(--pad)}
 .services .wrap{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:clamp(30px,6vw,100px)}
 .services h2{font-size:clamp(2.4rem,1rem + 4.2vw,5rem);position:sticky;top:120px;align-self:start}
 .svc{list-style:none;padding:0}
 .svc li{padding:22px 0;display:grid;grid-template-columns:minmax(0,1fr);gap:6px}
 .svc li+li{margin-top:6px}
 .svc h3{font-family:var(--display);font-weight:400;font-size:clamp(1.8rem,1.2rem + 1.8vw,3rem);letter-spacing:-.02em;line-height:1.05}
-.svc p{color:#3e4c42;max-width:46ch}
+.svc p{color:#c9cbbd;max-width:46ch}
+.svc li{grid-template-columns:minmax(0,1fr) auto;align-items:end;column-gap:24px;padding:28px 0}
+.svc li>div{display:grid;gap:8px}
+.svc h3{color:var(--ink);transition:color .25s}
+@media (hover:hover){.svc li:hover h3{color:var(--gold)}}
+.svc .mini{padding:11px 18px;font-size:.92rem;white-space:nowrap}
+@media (max-width:560px){.svc li{grid-template-columns:1fr;row-gap:14px}.svc .mini{justify-self:start}}
 @media (max-width:860px){.services{padding-top:40px}.services .wrap{grid-template-columns:1fr}.services h2{position:static}}
 
 /* ---------- classe V ---------- */
@@ -183,17 +194,14 @@ button,input,select{font:inherit;color:inherit}
 @media (max-width:860px){.book .wrap{grid-template-columns:1fr}.form{grid-template-columns:1fr}}
 
 /* ---------- rodapé ---------- */
-footer{background:var(--green);padding:clamp(70px,12vh,130px) var(--pad) 40px;overflow:hidden}
+footer{background:var(--black);padding:clamp(70px,12vh,130px) var(--pad) 40px;overflow:hidden}
 footer .word{font-family:var(--display);font-size:clamp(2.8rem,10.5vw,12rem);line-height:.85;letter-spacing:-.045em;white-space:nowrap;color:var(--ink)}
 footer .word em{font-style:normal;color:var(--gold)}
 footer .foot-top{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:clamp(20px,4vw,60px)}
 footer .word{pointer-events:none;user-select:none}
-.totop{position:relative;z-index:2;display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;width:clamp(150px,13vw,190px);aspect-ratio:1;border:0;border-radius:50%;background:var(--gold);color:var(--green);font:600 1.02rem/1.2 var(--text);text-align:center;padding:18px;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;transition:transform .16s var(--ease-out),background .2s}
+.totop{position:relative;z-index:2;justify-self:end}
 .totop *{pointer-events:none}
-.totop .arr{font-size:1.9rem;line-height:1}
-.totop:active{transform:scale(.96)}
-@media (hover:hover){.totop:hover{background:#d8c27c}}
-@media (max-width:860px){footer .foot-top{grid-template-columns:1fr}.totop{width:auto;aspect-ratio:auto;flex-direction:row;border-radius:99px;padding:18px 28px;justify-self:start;font-size:1.05rem}.totop .arr{font-size:1.3rem}}
+@media (max-width:860px){footer .foot-top{grid-template-columns:1fr}.totop{justify-self:start}}
 footer .cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:30px;margin-top:56px;font-size:.95rem;color:var(--muted)}
 footer .cols b{display:block;color:var(--ink);font-weight:500;margin-bottom:8px}
 footer .cols a{display:block;text-decoration:none;margin-bottom:4px}
@@ -209,6 +217,10 @@ footer .word{pointer-events:none;user-select:none}
 @media (hover:hover){.totop:hover{background:#d8c27c}}
 @media (max-width:860px){footer .foot-top{grid-template-columns:1fr}.totop{width:auto;aspect-ratio:auto;flex-direction:row;border-radius:99px;padding:18px 28px;justify-self:start;font-size:1.05rem}.totop .arr{font-size:1.3rem}}
 footer .cols{grid-template-columns:1fr}}
+
+.float-cta{position:fixed;z-index:60;right:var(--pad);bottom:calc(18px + env(safe-area-inset-bottom));box-shadow:0 14px 34px -10px rgba(0,0,0,.6);opacity:0;transform:translateY(16px);pointer-events:none;transition:opacity .3s var(--ease-out),transform .3s var(--ease-out)}
+.float-cta.on{opacity:1;transform:none;pointer-events:auto}
+@media (max-width:560px){.float-cta{left:var(--pad);right:var(--pad)}}
 
 /* placeholders visíveis para preencher */
 .todo{color:var(--gold)}
@@ -232,6 +244,7 @@ footer .cols{grid-template-columns:1fr}}
   <symbol id="dd" viewBox="0 0 24 24"><path d="M6 3h12l4 6-10 12L2 9z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M2 9h20M9 3l3 18 3-18" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" opacity=".7"/></symbol>
 </svg>
 
+<a class="btn float-cta" id="floatCta" href="#reservar" data-i18n="cta">Reservar transfer</a>
 <header class="nav" id="nav">
   <a class="brand" href="#top" aria-label="Dark Diamond Luxury"><svg><use href="#dd"/></svg>Dark Diamond <span class="lux">Luxury</span></a>
   <nav class="links" aria-label="Principal">
@@ -263,11 +276,11 @@ footer .cols{grid-template-columns:1fr}}
       <div class="board-wrap">
         <div class="board" id="board" aria-live="polite">
           <div class="greet" data-i18n="welcome">Bem-vindo a Lisboa</div>
-          <div class="name js-name">Sr. Andersen</div>
+          <div class="name js-name empty">O seu nome</div>
           <div class="mark"><svg><use href="#dd"/></svg>Dark Diamond Luxury</div>
         </div>
         <div class="board-input">
-          <label for="nameIn" data-i18n="try">Escreva o seu nome e veja a placa à sua espera</label>
+          <label for="nameIn" data-i18n="try">Escreva o seu nome: é assim que o vamos receber</label>
           <input id="nameIn" maxlength="28" autocomplete="name" data-i18n-ph="try_ph" placeholder="O seu nome">
         </div>
       </div>
@@ -285,10 +298,11 @@ footer .cols{grid-template-columns:1fr}}
         </div>
       </article>
       <article class="panel field">
-        <div class="bigboard" aria-hidden="true"><div class="greet" data-i18n="welcome">Bem-vindo a Lisboa</div><div class="name js-name">Sr. Andersen</div></div>
+        <div class="bigboard" aria-hidden="true"><div class="greet" data-i18n="welcome">Bem-vindo a Lisboa</div><div class="name js-name empty">O seu nome</div></div>
         <div>
           <h2 class="display" data-i18n="s2h">Alguém espera por si.</h2>
           <p data-i18n="s2p">À saída das chegadas, com o seu nome. Ajudamos com as malas e seguimos.</p>
+          <a class="btn panel-cta" href="#reservar" data-i18n="cta">Reservar transfer</a>
         </div>
       </article>
       <article class="panel">
@@ -303,6 +317,7 @@ footer .cols{grid-template-columns:1fr}}
         <div>
           <h2 class="display" data-i18n="s4h">Lisboa pela janela.</h2>
           <p data-i18n="s4p">Ao hotel, à reunião ou ao jantar. À hora marcada, sem pressas.</p>
+          <a class="btn panel-cta" href="#reservar" data-i18n="cta">Reservar transfer</a>
         </div>
       </article>
       <div class="counter" aria-hidden="true"><i class="on"></i><i></i><i></i><i></i></div>
@@ -320,6 +335,7 @@ footer .cols{grid-template-columns:1fr}}
       <div class="track" id="track"></div>
       <p class="swipe" data-i18n="swipe">Deslize para ver mais destinos</p>
       <p class="note" data-i18n="dnote">Tempos indicativos, sem trânsito. Fazemos qualquer outro destino em Portugal.</p>
+      <div style="padding:22px var(--pad) 0"><a class="btn dark" href="#reservar" data-i18n="cta">Reservar transfer</a></div>
     </div>
   </section>
 
@@ -328,18 +344,18 @@ footer .cols{grid-template-columns:1fr}}
     <div class="wrap">
       <h2 class="display" id="svc-h" data-i18n="svch">Ao seu ritmo.</h2>
       <ul class="svc">
-        <li><h3 data-i18n="v1h">Aeroporto</h3><p data-i18n="v1p">Recolha com o seu nome nas chegadas e acompanhamento do voo. Também para partidas.</p></li>
-        <li><h3 data-i18n="v2h">À disposição</h3><p data-i18n="v2p">Um motorista e um carro só para si, à hora ou ao dia, para reuniões, compras ou um dia cheio.</p></li>
-        <li><h3 data-i18n="v3h">Tours privados</h3><p data-i18n="v3p">Sintra, Cascais, Fátima, Évora ou o Douro, ao seu ritmo e com paragens onde quiser.</p></li>
-        <li><h3 data-i18n="v4h">Eventos e casamentos</h3><p data-i18n="v4p">Convidados recebidos e levados a horas, com a coordenação feita por nós.</p></li>
-        <li><h3 data-i18n="v5h">Longa distância</h3><p data-i18n="v5p">Porto, Algarve ou Espanha, de porta a porta.</p></li>
+        <li><div><h3 data-i18n="v1h">Aeroporto</h3><p data-i18n="v1p">Recolha com o seu nome nas chegadas e acompanhamento do voo. Também para partidas.</p></div><a class="btn mini" href="#reservar" data-svc="0" data-i18n="cta_short">Reservar</a></li>
+        <li><div><h3 data-i18n="v2h">À disposição</h3><p data-i18n="v2p">Um motorista e um carro só para si, à hora ou ao dia, para reuniões, compras ou um dia cheio.</p></div><a class="btn mini" href="#reservar" data-svc="1" data-i18n="cta_short">Reservar</a></li>
+        <li><div><h3 data-i18n="v3h">Tours privados</h3><p data-i18n="v3p">Sintra, Cascais, Fátima, Évora ou o Douro, ao seu ritmo e com paragens onde quiser.</p></div><a class="btn mini" href="#reservar" data-svc="2" data-i18n="cta_short">Reservar</a></li>
+        <li><div><h3 data-i18n="v4h">Eventos e casamentos</h3><p data-i18n="v4p">Convidados recebidos e levados a horas, com a coordenação feita por nós.</p></div><a class="btn mini" href="#reservar" data-svc="3" data-i18n="cta_short">Reservar</a></li>
+        <li><div><h3 data-i18n="v5h">Longa distância</h3><p data-i18n="v5p">Porto, Algarve ou Espanha, de porta a porta.</p></div><a class="btn mini" href="#reservar" data-svc="4" data-i18n="cta_short">Reservar</a></li>
       </ul>
     </div>
   </section>
 
   <!-- CLASSE V -->
   <section class="vclass" id="classe-v" aria-labelledby="v-h">
-    <div class="img"><img src="https://images.unsplash.com/photo-1746350359617-5389d5d3983f?auto=format&fit=crop&w=1800&q=70" alt="" loading="lazy" onerror="this.style.display='none'"></div>
+    <div class="img"><img src="https://images.unsplash.com/photo-1730800328198-f9efbf9db53f?auto=format&fit=crop&w=1800&q=70" alt="" loading="lazy" onerror="this.style.display='none'"></div>
     <div class="txt">
       <h2 class="display" id="v-h" data-i18n="vh">Uma sala de estar sobre rodas.</h2>
       <p data-i18n="vp">A Mercedes-Benz Classe V é o centro da nossa frota: espaço para o grupo e para as malas, bancos frente a frente e um interior pensado para conversar ou descansar.</p>
@@ -348,6 +364,7 @@ footer .cols{grid-template-columns:1fr}}
         <div><b data-i18n="f2b">Bagagem</b><span data-i18n="f2s">malas de porão incluídas</span></div>
         <div><b>24/7</b><span data-i18n="f3s">a qualquer hora do voo</span></div>
       </div>
+      <a class="btn" href="#reservar" data-i18n="cta" style="margin-top:36px;align-self:flex-start">Reservar transfer</a>
     </div>
   </section>
 
@@ -381,7 +398,7 @@ footer .cols{grid-template-columns:1fr}}
 <footer>
   <div class="foot-top">
     <div class="word">Dark Diamond<br><em>Luxury</em></div>
-    <button class="totop" type="button" id="toTop"><span class="arr" aria-hidden="true">↑</span><span data-i18n="top">Voltar ao início</span></button>
+    <button class="btn totop" type="button" id="toTop"><span data-i18n="top">Voltar ao início</span><span aria-hidden="true">↑</span></button>
   </div>
   <div class="cols">
     <div><b data-i18n="c_contact">Contacto</b><a href="#" id="waLink">WhatsApp <span class="todo">[número]</span></a><a href="#" class="todo">[email]</a><a href="#" class="todo">[Instagram]</a></div>
@@ -393,7 +410,7 @@ footer .cols{grid-template-columns:1fr}}
     <a href="https://unsplash.com/photos/yydI2Op7ILs">Iler Stoe</a>,
     <a href="https://unsplash.com/photos/oe4QHK9EwS8">Luis Quintero</a>,
     <a href="https://unsplash.com/photos/gOLCAOuc7iA">Svetlana Gumerova</a>,
-    <a href="https://unsplash.com/photos/buMAEjqZPA0">Ansis Kančs</a>.
+    <a href="https://unsplash.com/photos/-eUrpy0fjXE">Antonio Araujo</a>.
     © <span id="yr"></span> Dark Diamond Luxury.</p>
 </footer>
 
@@ -409,7 +426,7 @@ const WHATSAPP = '';   // ex.: '351912345678' (só números, com indicativo)
 const T = {
   pt:{nav_exp:'Experiência',nav_dest:'Destinos',nav_svc:'Serviços',nav_fleet:'Classe V',cta_short:'Reservar',
     h1a:'Lisboa recebe-o',h1b:'pelo nome.',sub:'Transfers privados e motorista ao seu dispor, em Lisboa e em todo o país.',
-    cta:'Reservar transfer',cta2:'Ver a experiência',welcome:'Bem-vindo a Lisboa',try:'Escreva o seu nome e veja a placa à sua espera',try_ph:'O seu nome',
+    cta:'Reservar transfer',cta2:'Ver a experiência',welcome:'Bem-vindo a Lisboa',try:'Escreva o seu nome: é assim que o vamos receber',yourname:'O seu nome',try_ph:'O seu nome',
     s1h:'Aterra.',s1p:'Acompanhamos o seu voo. Se chegar mais cedo ou mais tarde, o motorista também.',
     s2h:'Alguém espera por si.',s2p:'À saída das chegadas, com o seu nome. Ajudamos com as malas e seguimos.',
     s3h:'Entre. Descanse.',s3p:'Bancos em pele, espaço para todos e silêncio a bordo. A viagem é sua.',
@@ -432,7 +449,7 @@ const T = {
     msg:(d)=>`Olá! Gostaria de reservar.\nServiço: ${d.svc}\nDestino: ${d.to}\nData: ${d.date} ${d.time}\nPassageiros: ${d.pax}${d.flight?`\nVoo: ${d.flight}`:''}\nNome: ${d.name}`},
   en:{nav_exp:'Experience',nav_dest:'Destinations',nav_svc:'Services',nav_fleet:'V-Class',cta_short:'Book',
     h1a:'Lisbon greets you',h1b:'by name.',sub:'Private transfers and chauffeurs at your disposal, in Lisbon and across Portugal.',
-    cta:'Book a transfer',cta2:'See the experience',welcome:'Welcome to Lisbon',try:'Type your name and see the sign waiting for you',try_ph:'Your name',
+    cta:'Book a transfer',cta2:'See the experience',welcome:'Welcome to Lisbon',try:'Type your name: this is how we will greet you',yourname:'Your name',try_ph:'Your name',
     s1h:'You land.',s1p:'We track your flight. Early or late, your driver adjusts too.',
     s2h:'Someone is waiting.',s2p:'Right at arrivals, holding your name. We take the luggage and off we go.',
     s3h:'Step in. Unwind.',s3p:'Leather seats, room for everyone and a quiet cabin. The ride is yours.',
@@ -469,7 +486,7 @@ function render(){
   tr.innerHTML = PLACES.map(([n,m],i)=>`<button class="place" type="button" data-i="${i}"><span class="nm">${n}</span><span class="tm"><b>≈ ${m}</b> ${t.from}</span><span class="go">${t.go}</span></button>`).join('');
   const ch = document.getElementById('svcChips');
   ch.innerHTML = t.svcs.map((s,i)=>`<button type="button" aria-pressed="${i===svcPick}" data-i="${i}">${s}</button>`).join('');
-  if(!document.getElementById('nameIn').value.trim()) document.querySelectorAll('.js-name').forEach(n=>n.textContent = lang==='pt'?'Sr. Andersen':'Mr. Andersen');
+  if(!document.getElementById('nameIn').value.trim()) document.querySelectorAll('.js-name').forEach(n=>{n.textContent = t.yourname; n.classList.add('empty');});
   document.title = lang==='pt' ? 'Dark Diamond Luxury — Transfers privados em Lisboa' : 'Dark Diamond Luxury — Private transfers in Lisbon';
 }
 render();
@@ -485,7 +502,7 @@ document.querySelector('.lang').addEventListener('click', e=>{
 const nameIn = document.getElementById('nameIn');
 nameIn.addEventListener('input', ()=>{
   const v = nameIn.value.trim();
-  document.querySelectorAll('.js-name').forEach(n=> n.textContent = v || (lang==='pt'?'Sr. Andersen':'Mr. Andersen'));
+  document.querySelectorAll('.js-name').forEach(n=>{ n.textContent = v || T[lang].yourname; n.classList.toggle('empty',!v); });
   const f=document.getElementById('fName'); if(!f.dataset.touched) f.value=v;
 });
 document.getElementById('fName').addEventListener('input', e=> e.target.dataset.touched='1');
@@ -533,6 +550,21 @@ document.querySelectorAll('a[href^="#"]').forEach(a=>a.addEventListener('click',
   addEventListener('pointerup',()=>{ if(!down) return; down=false; tr.classList.remove('drag'); });
   tr.addEventListener('click',e=>{ if(moved){ e.stopPropagation(); e.preventDefault(); moved=false; } },true);
 })();
+
+/* botão flutuante de reserva: aparece depois do topo, esconde-se na reserva e no rodapé */
+(()=>{
+  // aparece depois do topo; esconde-se onde a secção já tem os seus botões (serviços, reserva, rodapé)
+  const f=document.getElementById('floatCta'), seen=new Map();
+  const hide=['reservar','servicos'];
+  const io=new IntersectionObserver(es=>{es.forEach(e=>seen.set(e.target,e.isIntersecting));
+    const heroOut=!seen.get(document.querySelector('.hero'));
+    const busy=[...seen].some(([el,v])=>v && el!==document.querySelector('.hero'));
+    f.classList.toggle('on', heroOut && !busy);},{threshold:0});
+  io.observe(document.querySelector('.hero')); hide.forEach(id=>io.observe(document.getElementById(id))); io.observe(document.querySelector('footer'));
+})();
+document.querySelectorAll('[data-svc]').forEach(a=>a.addEventListener('click',()=>{
+  svcPick=+a.dataset.svc; document.querySelectorAll('#svcChips button').forEach((x,i)=>x.setAttribute('aria-pressed', i===svcPick));
+}));
 
 /* nav fica sólida depois do topo */
 const nav=document.getElementById('nav');
