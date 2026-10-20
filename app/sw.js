@@ -1,7 +1,7 @@
 // Service worker da app Despacho: recebe as notificações e, ao tocar numa, abre a app no ecrã certo.
 // Também guarda a "casca" da app (páginas, código, letra, ícones) para abrir sem rede.
 // Os dados vêm do Supabase e não passam por aqui (a app guarda a última cópia por conta própria).
-const CACHE = 'despacho-v1';
+const CACHE = 'despacho-v2';
 const SHELL = '/Despacho/app/';
 
 self.addEventListener('install', (e) => {
@@ -40,6 +40,9 @@ self.addEventListener('push', (e) => {
     badge: '/Despacho/app/icons/icon-192.png',
     tag: d.tag,
     renotify: !!d.tag,
+    // avisos de alarme ("Acorde!") ficam no ecrã até tocar e vibram; os restantes comportam-se como sempre
+    requireInteraction: /^(nag-|lembrete-|wake1-)/.test(d.tag || ''),
+    vibrate: /^nag-/.test(d.tag || '') ? [400, 150, 400, 150, 600] : [120],
     data: { url: d.url || '/Despacho/app/' },
   }));
 });
