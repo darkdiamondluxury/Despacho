@@ -1,7 +1,7 @@
 // Service worker da app Despacho: recebe as notificações e, ao tocar numa, abre a app no ecrã certo.
 // Também guarda a "casca" da app (páginas, código, letra, ícones) para abrir sem rede.
 // Os dados vêm do Supabase e não passam por aqui (a app guarda a última cópia por conta própria).
-const CACHE = 'despacho-v2';
+const CACHE = 'despacho-v3';
 const SHELL = '/Despacho/app/';
 
 self.addEventListener('install', (e) => {
@@ -19,7 +19,7 @@ self.addEventListener('fetch', (e) => {
   if (req.method !== 'GET' || url.origin !== self.location.origin || !url.pathname.startsWith('/Despacho/app')) return;
   if (req.mode === 'navigate') {
     // páginas: tenta a rede (versão nova); sem rede, abre a última guardada
-    e.respondWith(fetch(req).then((r) => { const cp = r.clone(); caches.open(CACHE).then((c) => c.put(SHELL, cp)); return r; })
+    e.respondWith(fetch(req).then((r) => { if (r.ok) { const cp = r.clone(); caches.open(CACHE).then((c) => c.put(SHELL, cp)); } return r; })
       .catch(() => caches.match(SHELL)));
     return;
   }
