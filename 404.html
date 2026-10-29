@@ -26,8 +26,25 @@
   <link rel="icon" href="/Despacho/app/favicon.ico"/>
     <link rel="manifest" href="/Despacho/app/manifest.webmanifest" />
     <link rel="apple-touch-icon" href="/Despacho/app/icons/apple-touch-icon.png" />
-    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#F2F3F5" />
-    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0B0F0D" />
+    <meta name="theme-color" content="#F2F3F5" />
+    <meta name="color-scheme" content="light" />
+    <link rel="apple-touch-startup-image" media="(device-width: 402px) and (device-height: 874px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/Despacho/app/splash/402x874@3.png" />
+    <link rel="apple-touch-startup-image" media="(device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/Despacho/app/splash/440x956@3.png" />
+    <link rel="apple-touch-startup-image" media="(device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/Despacho/app/splash/393x852@3.png" />
+    <link rel="apple-touch-startup-image" media="(device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/Despacho/app/splash/430x932@3.png" />
+    <link rel="apple-touch-startup-image" media="(device-width: 420px) and (device-height: 912px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/Despacho/app/splash/420x912@3.png" />
+    <link rel="apple-touch-startup-image" media="(device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/Despacho/app/splash/390x844@3.png" />
+    <link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/Despacho/app/splash/375x812@3.png" />
+    <link rel="apple-touch-startup-image" media="(device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/Despacho/app/splash/428x926@3.png" />
+    <link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/Despacho/app/splash/414x896@3.png" />
+    <link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 896px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="/Despacho/app/splash/414x896@2.png" />
+    <link rel="apple-touch-startup-image" media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)" href="/Despacho/app/splash/414x736@3.png" />
+    <link rel="apple-touch-startup-image" media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="/Despacho/app/splash/375x667@2.png" />
+    <link rel="apple-touch-startup-image" media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="/Despacho/app/splash/768x1024@2.png" />
+    <link rel="apple-touch-startup-image" media="(device-width: 820px) and (device-height: 1180px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="/Despacho/app/splash/820x1180@2.png" />
+    <link rel="apple-touch-startup-image" media="(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="/Despacho/app/splash/834x1194@2.png" />
+    <link rel="apple-touch-startup-image" media="(device-width: 834px) and (device-height: 1112px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="/Despacho/app/splash/834x1112@2.png" />
+    <link rel="apple-touch-startup-image" media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)" href="/Despacho/app/splash/1024x1366@2.png" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="Despacho" />
@@ -41,24 +58,24 @@
     </noscript>
     <!-- The root element for your Expo app. -->
     <div id="root"><style id="boot-skeleton">
-      html, body { background: #F2F3F5; }
-      .bk { max-width: 720px; width: 100%; margin: 0 auto; padding: 56px 16px 0; box-sizing: border-box; }
-      .bk i { display: block; background: #E6E8EA; border-radius: 12px; animation: bkp 1.3s ease-in-out infinite; }
-      .bk .c { background: #fff; border-radius: 24px; padding: 18px; margin-top: 12px; display: flex; gap: 14px; align-items: center; box-shadow: 0 1px 2px rgba(16,24,20,0.04), 0 6px 20px rgba(16,24,20,0.05); }
-      @keyframes bkp { 0%, 100% { opacity: 1 } 50% { opacity: .55 } }
-      @media (prefers-reduced-motion: reduce) { .bk i { animation: none } }
+      html, body { background: #F2F3F5; margin: 0; }
+      .bk { max-width: 760px; width: 100%; margin: 0 auto; padding: calc(env(safe-area-inset-top, 0px) + 16px) 16px 0; box-sizing: border-box; display: flex; flex-direction: column; gap: 16px; }
+      .bk i { display: block; background: rgba(60,60,67,0.09); border-radius: 12px; }
+      .bk .p { animation: bkp 1.5s ease-in-out infinite; }
+      .bk .g { background: rgba(255,255,255,0.8); }
+      .bk .pill { position: fixed; left: 14px; right: 14px; bottom: max(env(safe-area-inset-bottom, 0px), 12px); height: 64px; border-radius: 32px; background: rgba(255,255,255,0.8); animation: bkp 1.5s ease-in-out infinite; }
+      @keyframes bkp { 0%, 100% { opacity: .55 } 50% { opacity: 1 } }
+      @media (min-width: 900px) { .bk .pill { display: none } }
+      @media (prefers-reduced-motion: reduce) { .bk .p, .bk .pill { animation: none; opacity: 1 } }
     </style>
     <div class="bk" aria-hidden="true">
-      <i style="width:150px;height:30px;border-radius:15px"></i>
-      <i style="width:230px;height:12px;border-radius:6px;margin-top:12px"></i>
-      <div style="display:flex;gap:12px;margin-top:22px">
-        <i style="flex:1;height:92px;border-radius:24px"></i><i style="flex:1;height:92px;border-radius:24px"></i><i style="flex:1;height:92px;border-radius:24px"></i>
-      </div>
-      <div class="c"><i style="width:52px;height:40px"></i><div style="flex:1"><i style="width:75%;height:13px;border-radius:7px"></i><i style="width:45%;height:10px;border-radius:5px;margin-top:10px"></i></div></div>
-      <div class="c"><i style="width:52px;height:40px"></i><div style="flex:1"><i style="width:75%;height:13px;border-radius:7px"></i><i style="width:45%;height:10px;border-radius:5px;margin-top:10px"></i></div></div>
-      <div class="c"><i style="width:52px;height:40px"></i><div style="flex:1"><i style="width:75%;height:13px;border-radius:7px"></i><i style="width:45%;height:10px;border-radius:5px;margin-top:10px"></i></div></div>
-      <div class="c"><i style="width:52px;height:40px"></i><div style="flex:1"><i style="width:75%;height:13px;border-radius:7px"></i><i style="width:45%;height:10px;border-radius:5px;margin-top:10px"></i></div></div>
-    </div></div>
-  <script src="/Despacho/app/_expo/static/js/web/entry-2a7f81ac7d08edec00edd70691dbad54.js" defer></script>
+      <div class="p" style="display:flex;gap:10px"><div class="g" style="flex:1;height:44px;border-radius:22px"></div><div class="g" style="width:44px;height:44px;border-radius:22px"></div></div>
+      <div class="p" style="display:flex;flex-direction:column;gap:8px"><i style="width:150px;height:30px;border-radius:15px"></i><i style="width:230px;height:12px;border-radius:6px"></i></div>
+      <div class="p g" style="height:44px;border-radius:14px"></div>
+      <div class="p" style="display:flex;flex-direction:column;gap:12px"><i style="width:190px;height:16px;border-radius:8px"></i><div class="g" style="height:72px;border-radius:22px"></div></div>
+      <div class="p" style="display:flex;flex-direction:column;gap:12px"><i style="width:150px;height:16px;border-radius:8px"></i><div class="g" style="height:150px;border-radius:22px"></div></div>
+    </div>
+    <div class="bk"><div class="pill" aria-hidden="true"></div></div></div>
+  <script src="/Despacho/app/_expo/static/js/web/entry-87e8f7ce0cff6d613382457ed1fad383.js" defer></script>
 </body>
 </html>
