@@ -1,7 +1,7 @@
 // Service worker da app Despacho: recebe as notificações e, ao tocar numa, abre a app no ecrã certo.
 // Também guarda a "casca" da app (páginas, código, letra, ícones) para abrir sem rede.
 // Os dados vêm do Supabase e não passam por aqui (a app guarda a última cópia por conta própria).
-const CACHE = 'despacho-v3';
+const CACHE = 'despacho-v4';
 const SHELL = '/Despacho/app/';
 
 self.addEventListener('install', (e) => {
@@ -53,7 +53,18 @@ self.addEventListener('notificationclick', (e) => {
   e.waitUntil((async () => {
     const all = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
     for (const c of all) {
-      if (c.url.includes('/Despacho/app')) { await c.focus(); if ('navigate' in c) return c.navigate(url); return; }
+      if (c.url.includes('/Despacho/app')) {
+        await c.focus();
+        // a app aberta navega sozinha (sem recarregar); se não responder em 700 ms (versão antiga), recarrega no endereço
+        const ok = await new Promise((res) => {
+          const ch = new MessageChannel();
+          ch.port1.onmessage = () => res(true);
+          setTimeout(() => res(false), 700);
+          c.postMessage({ type: 'open', url }, [ch.port2]);
+        });
+        if (!ok && 'navigate' in c) return c.navigate(url);
+        return;
+      }
     }
     return self.clients.openWindow(url);
   })());
