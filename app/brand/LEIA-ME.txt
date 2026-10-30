@@ -1,0 +1,7 @@
+Logótipos oficiais das apps (ficheiros que a pessoa junta; a app não os desenha).
+Nomes esperados, PNG quadrado (ideal 256x256, cantos já arredondados ou não):
+  waze.png          logótipo do Waze
+  google-maps.png   logótipo do Google Maps
+  whatsapp.png      logótipo do WhatsApp
+  phone.png         ícone do Telefone do iPhone
+Enquanto um ficheiro não existir, a app mostra o ícone genérico no lugar dele.
