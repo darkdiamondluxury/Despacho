@@ -1,7 +1,8 @@
 // Service worker da app Despacho: recebe as notificações e, ao tocar numa, abre a app no ecrã certo.
 // Também guarda a "casca" da app (páginas, código, letra, ícones) para abrir sem rede.
 // Os dados vêm do Supabase e não passam por aqui (a app guarda a última cópia por conta própria).
-const CACHE = 'despacho-v6';
+const CACHE = 'despacho-v7';
+const PICS = 'despacho-fotos-v1';
 const SHELL = '/Despacho/app/';
 // Ficheiros com o conteúdo no nome (o código em _expo/static, assets): nunca mudam, por isso, uma vez guardados,
 // abrem do aparelho sem perguntar à rede (13/11/2026; antes voltavam a ser descarregados em cada abertura).
@@ -12,7 +13,7 @@ self.addEventListener('install', (e) => {
   self.skipWaiting();
 });
 self.addEventListener('activate', (e) => e.waitUntil((async () => {
-  for (const k of await caches.keys()) if (k !== CACHE) await caches.delete(k);
+  for (const k of await caches.keys()) if (k !== CACHE && k !== PICS) await caches.delete(k);
   await self.clients.claim();
 })()));
 
@@ -31,6 +32,21 @@ async function prune(c, html, prevHtml) {
 self.addEventListener('fetch', (e) => {
   const req = e.request;
   const url = new URL(req.url);
+  // Fotos dos drivers (13/11/2026): vêm do Supabase com um link temporário que muda em cada pedido. Guardam-se pelo
+  // CAMINHO do ficheiro (sem o código do link), por isso abrem logo do aparelho. Uma foto nova tem sempre um caminho novo
+  // (o nome leva a data): nunca se mostra uma foto velha. Os logótipos dos parceiros NÃO (são substituídos no mesmo
+  // ficheiro), nem provas e recibos.
+  if (req.method === 'GET' && /\/storage\/v1\/object\/sign\/media\/[^/]+\/drivers\//.test(url.pathname)) {
+    e.respondWith(caches.open(PICS).then(async (c) => {
+      const key = url.origin + url.pathname;
+      const hit = await c.match(key);
+      if (hit) return hit;
+      const r = await fetch(req);
+      if (r.ok || r.type === 'opaque') c.put(key, r.clone()).catch(() => {});
+      return r;
+    }));
+    return;
+  }
   if (req.method !== 'GET' || url.origin !== self.location.origin || !url.pathname.startsWith('/Despacho/app')) return;
   // o "há versão nova?" da app (index.html?v=…) vai sempre à rede e não fica guardado
   if (url.searchParams.has('v') || url.pathname.endsWith('/sw.js')) return;
