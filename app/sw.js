@@ -1,13 +1,11 @@
 // Service worker da app Despacho: recebe as notificações e, ao tocar numa, abre a app no ecrã certo.
 // Também guarda a "casca" da app (páginas, código, letra, ícones) para abrir sem rede.
 // Os dados vêm do Supabase e não passam por aqui (a app guarda a última cópia por conta própria).
-const CACHE = 'despacho-v5';
+const CACHE = 'despacho-v6';
 const SHELL = '/Despacho/app/';
 // Ficheiros com o conteúdo no nome (o código em _expo/static, assets): nunca mudam, por isso, uma vez guardados,
 // abrem do aparelho sem perguntar à rede (13/11/2026; antes voltavam a ser descarregados em cada abertura).
 const FOREVER = /^\/Despacho\/app\/(_expo\/static\/|assets\/)/;
-// Página: espera pela rede no máximo isto; depois abre a guardada (rede fraca não pode prender a app no arranque).
-const NAV_WAIT_MS = 1200;
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.add(SHELL)).catch(() => {}));
@@ -18,9 +16,11 @@ self.addEventListener('activate', (e) => e.waitUntil((async () => {
   await self.clients.claim();
 })()));
 
-// Tira do aparelho o código de versões antigas que a página nova já não cita (o que faltar volta da rede).
-async function prune(c, html) {
-  const keep = new Set(html.match(/\/Despacho\/app\/_expo\/static\/[^"']+/g) || []);
+// Tira do aparelho o código de versões antigas: guarda o que a página nova cita E o que a anterior citava (a página
+// aberta agora ainda é a anterior e pode precisar dos seus ecrãs). O que faltar volta da rede.
+async function prune(c, html, prevHtml) {
+  const refs = (h) => h.match(/\/Despacho\/app\/_expo\/static\/[^"']+/g) || [];
+  const keep = new Set([...refs(html), ...refs(prevHtml || '')]);
   if (keep.size < 3) return;
   for (const req of await c.keys()) {
     const path = new URL(req.url).pathname;
@@ -32,19 +32,27 @@ self.addEventListener('fetch', (e) => {
   const req = e.request;
   const url = new URL(req.url);
   if (req.method !== 'GET' || url.origin !== self.location.origin || !url.pathname.startsWith('/Despacho/app')) return;
+  // o "há versão nova?" da app (index.html?v=…) vai sempre à rede e não fica guardado
+  if (url.searchParams.has('v') || url.pathname.endsWith('/sw.js')) return;
   if (req.mode === 'navigate') {
-    // página: a da rede se chegar depressa (versão nova); senão a guardada, e a da rede fica guardada para a próxima
+    // página (13/11/2026): abre JÁ a guardada no aparelho e pede a da rede por trás; se for uma versão nova, fica
+    // guardada para a próxima abertura e a app mostra "Há uma versão nova · Atualizar" (lib/updateCheck.ts).
+    // Antes esperava pela rede até 1,2 s em cada abertura. Sem nada guardado (1.ª vez), vai à rede como sempre.
     e.respondWith((async () => {
       const c = await caches.open(CACHE);
       const net = fetch(req).then(async (r) => {
-        if (r.ok) { const txt = await r.clone().text(); await c.put(SHELL, r.clone()); prune(c, txt).catch(() => {}); }
+        if (r.ok) {
+          const txt = await r.clone().text();
+          const prev = await c.match(SHELL).then((x) => (x ? x.text() : '')).catch(() => '');
+          await c.put(SHELL, r.clone());
+          if (txt !== prev) prune(c, txt, prev).catch(() => {});
+        }
         return r;
       });
       const cached = await c.match(SHELL);
       if (!cached) return net.catch(() => Response.error());
-      const slow = new Promise((res) => setTimeout(() => res(cached), NAV_WAIT_MS));
       e.waitUntil(net.catch(() => {}));
-      return Promise.race([net.catch(() => cached), slow]);
+      return cached;
     })());
     return;
   }
